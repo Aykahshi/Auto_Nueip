@@ -35,6 +35,7 @@ class ClockButton extends StatelessWidget {
             ShadButton(
               width: 150,
               height: 80,
+              padding: const EdgeInsets.symmetric(horizontal: 3),
               onPressed: () => service.clockIn(),
               child: _buildButtonChild(
                 context: context,
@@ -47,6 +48,7 @@ class ClockButton extends StatelessWidget {
             ShadButton(
               width: 150,
               height: 80,
+              padding: const EdgeInsets.symmetric(horizontal: 3),
               onPressed: () => service.clockOut(),
               child: _buildButtonChild(
                 context: context,

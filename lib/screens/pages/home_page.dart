@@ -64,9 +64,11 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Gap(20),
+                const Gap(10),
                 ShadCard(
                     width: MediaQuery.of(context).size.width * 0.9,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                     backgroundColor: Colors.grey[800]!.withOpacity(0.15),
                     child: const WorklogCalendar())
               ],
