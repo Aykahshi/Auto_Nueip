@@ -1,0 +1,89 @@
+{
+  "set_info_first": "請先設定您的使用者資料！",
+  "welcome": "歡迎 {name}!",
+  "time_now": "現在時間: {time}",
+  "change_action": {
+    "title": "修改使用者資料",
+    "changed": "使用者資料已修改。"
+  },
+  "button": {
+    "save": "儲存",
+    "reset": "重置",
+    "cancel": "取消",
+    "clear": "清除"
+  },
+  "reset_action": {
+    "title": "您確定要重置使用者資料嗎？",
+    "success": "使用者資料已重置。",
+    "alert": "此操作無法撤銷。您將需要重新輸入。"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "一般設定",
+    "click_to_check": "點擊查看當前使用者資料。",
+    "change_title": "使用者資料",
+    "change_desc": "修改您的使用者資料。",
+    "remind_title": "提醒",
+    "remind_desc": "開啟或關閉打卡提醒功能。",
+    "lang_title": "語言",
+    "lang_desc": "一鍵變更應用程式語言！",
+    "reset_title": "重置使用者資料"
+  },
+  "log": {
+    "loading": "載入中...",
+    "title": "當天打卡記錄",
+    "time": "打卡時間",
+    "status": "打卡狀態",
+    "no_logs": "沒有任何打卡記錄。",
+    "error": "好像出錯了。請稍後再試。"
+  },
+  "clock": {
+    "in": "上班打卡",
+    "out": "下班打卡",
+    "in_success": "上班打卡成功！",
+    "out_success": "下班打卡成功！",
+    "fail": "打卡失敗！請稍後再試。"
+  },
+  "status": {
+    "clock_in": "上班",
+    "clock_out": "下班"
+  },
+  "method": {
+    "in": "上班",
+    "out": "下班"
+  },
+  "time_off": {
+    "title": "今天請假：假別：{type}",
+    "al":"休假",
+    "sl":"病假",
+    "ml1":"婚假",
+    "pl":"事假",
+    "bl":"喪假",
+    "ml2":"產假",
+    "other": "其他"
+  },
+  "current_info": {
+    "title": "當前使用者資料",
+    "company": "公司編號: {company}",
+    "id": "員工編號: {id}",
+    "password": "密碼: {password}"
+  },
+  "form": {
+    "company": "公司編號",
+    "name": "使用者名稱",
+    "id": "員工編號",
+    "password": "密碼"
+  },
+  "placeholder": {
+    "company": "請輸入公司編號",
+    "name": "請輸入使用者名稱",
+    "id": "請輸入員工編號",
+    "password": "請輸入密碼"
+  },
+  "error": {
+    "login_failed": "登入失敗！請確認您的使用者資料！",
+    "clock_in_failed": "上班打卡失敗，請稍後再試！",
+    "clock_out_failed": "下班打卡失敗，請稍後再試！",
+    "common": "打卡失敗！請稍後再試。"
+  }
+}

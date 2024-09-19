@@ -1,0 +1,88 @@
+{
+  "set_info_first": "Please set your info first!",
+  "welcome": "Welcome {name}!",
+  "time_now": "Now: {time}",
+  "change_action": {
+    "title": "Change User Info",
+    "changed": "User Info has been changed."
+  },
+  "button": {
+    "save": "Save",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "clear": "Clear"
+  },
+  "reset_action": {
+    "title": "Are you sure to reset?",
+    "success": "User Info has been reset.",
+    "alert": "This action cannot be undone. You will need to enter info once again."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "General",
+    "click_to_check": "Click to check current info!",
+    "change_title": "User Info",
+    "change_desc": "Change your user information.",
+    "remind_title": "Remind Me",
+    "remind_desc": "Open/Close clock in/out reminders.",
+    "lang_title": "Language",
+    "lang_desc": "Change the app language by one click.",
+    "reset_title": "Reset User Info"
+  },
+  "log": {
+    "loading": "Loading logs...",
+    "title": "Logs of the day",
+    "time": "Time",
+    "status": "Status",
+    "no_logs": "Nothing to show."
+  },
+  "clock": {
+    "in": "Clock In",
+    "out": "Clock Out",
+    "in_success": "Clock In Success!",
+    "out_success": "Clock Out Success!",
+    "fail": "Clock In/Out Failed. Please try again."
+  },
+  "status": {
+    "clock_in": "Clock In",
+    "clock_out": "Clock Out"
+  },
+  "method": {
+    "in": "In",
+    "out": "Out"
+  },
+  "time_off": {
+    "title": "Leave Today: {type}",
+    "al":"AL",
+    "sl":"SL",
+    "ml1":"ML1",
+    "pl":"PL",
+    "bl":"BL",
+    "ml2":"ML2",
+    "other": "Other"
+  },
+  "current_info": {
+    "title": "Current User Info",
+    "company": "Company: {company}",
+    "id": "ID: {id}",
+    "password": "Password: {password}"
+  },
+  "form": {
+    "company": "Company",
+    "name": "Name",
+    "id": "UserID",
+    "password": "Password"
+  },
+  "placeholder": {
+    "company": "Enter your company name",
+    "name": "Enter your name",
+    "id": "Enter your UserID",
+    "password": "Enter your password"
+  },
+  "error": {
+    "login_failed": "Login failed. Please check your user info.",
+    "clock_in_failed": "Clock In failed. Please try again.",
+    "clock_out_failed": "Clock Out failed. Please try again.",
+    "common": "Something went wrong. Please try again."
+  }
+}
