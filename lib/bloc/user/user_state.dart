@@ -5,12 +5,6 @@ class UserState extends Equatable {
 
   const UserState({required this.user});
 
-  UserState copyWith({User? user}) {
-    return UserState(
-      user: user ?? this.user,
-    );
-  }
-
   @override
   List<Object> get props => [user];
 

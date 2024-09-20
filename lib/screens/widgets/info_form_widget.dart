@@ -85,7 +85,7 @@ class FormFields extends StatelessWidget {
   }
 
   List<Widget> _buildFormFields() {
-    final ValueNotifier<bool> obscure = ValueNotifier(false);
+    final ValueNotifier<bool> obscure = ValueNotifier(true);
 
     return [
       ShadInputFormField(
@@ -117,8 +117,8 @@ class FormFields extends StatelessWidget {
               onPressed: () => obscure.value = !obscure.value,
               icon: Icon(
                 obscure.value
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
                 size: 20,
                 color: Colors.grey,
               ),

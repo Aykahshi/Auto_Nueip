@@ -4,7 +4,7 @@
   "time_now": "現在時間: {time}",
   "change_action": {
     "title": "修改使用者資料",
-    "changed": "使用者資料已修改。"
+    "changed": "修改成功！請點擊右上角刷新！"
   },
   "button": {
     "save": "儲存",

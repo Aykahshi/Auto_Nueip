@@ -6,6 +6,8 @@ import 'package:gap/gap.dart';
 import 'package:gl_nueip/bloc/lang/lang_cubit.dart';
 import 'package:gl_nueip/bloc/remind/remind_cubit.dart';
 import 'package:gl_nueip/bloc/user/user_cubit.dart';
+import 'package:gl_nueip/core/services/nueip_service.dart';
+import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/generated/assets.dart';
 import 'package:gl_nueip/screens/dialogs/current_info_dialog.dart';
 import 'package:gl_nueip/screens/dialogs/reset_alert.dart';
@@ -26,6 +28,19 @@ class SettingPage extends StatelessWidget {
           style: theme.textTheme.h3.copyWith(fontWeight: FontWeight.w200),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final NueipService service = locator<NueipService>();
+              await service.checkStatus();
+            },
+            icon: const Icon(
+              Icons.restart_alt_outlined,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 20)
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),

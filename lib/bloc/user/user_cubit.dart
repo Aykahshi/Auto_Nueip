@@ -22,7 +22,7 @@ class UserCubit extends Cubit<UserState> {
     String? password,
   }) async {
     emit(
-      state.copyWith(
+      UserState(
         user: User(
           company: company ?? state.user.company,
           name: name ?? state.user.name,
@@ -36,7 +36,7 @@ class UserCubit extends Cubit<UserState> {
   }
 
   void saveUserNum(String number) {
-    emit(state.copyWith(user: state.user.copyWith(number: number)));
+    emit(UserState(user: state.user.copyWith(number: number)));
     _saveState();
   }
 

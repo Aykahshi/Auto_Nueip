@@ -75,14 +75,14 @@ class NueipService {
     try {
       final Response response = await _dio.post(_loginUrl, data: body);
       if (response.statusCode != 303) {
-        _authCubit.loginFailed('error.login_failed'.tr());
+        _authCubit.loginFailed();
       }
       _redirectUrl = response.headers['location']?.first ?? '';
       if (_redirectUrl!.contains('/home')) {
         _authCubit.loginSuccess();
       }
     } catch (e) {
-      _authCubit.loginFailed('error.common'.tr());
+      _authCubit.loginFailed();
     }
   }
 
@@ -102,7 +102,7 @@ class NueipService {
         _token = extractToken(response.data);
       }
     } catch (e) {
-      _authCubit.loginFailed('error.common'.tr());
+      _authCubit.loginFailed();
     }
   }
 
@@ -228,6 +228,7 @@ class NueipService {
           dailyLogCubit.hasWorked(workLogs: workLogs);
         }
       }
+      dailyLogCubit.hasError();
     } catch (e) {
       if (kDebugMode) {
         print('Failed to get daily logs: $e');

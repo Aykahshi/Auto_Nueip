@@ -4,7 +4,7 @@
   "time_now": "Now: {time}",
   "change_action": {
     "title": "Change User Info",
-    "changed": "User Info has been changed."
+    "changed": "Successfully! Refresh by click the upper right button."
   },
   "button": {
     "save": "Save",
