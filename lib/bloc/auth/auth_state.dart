@@ -9,7 +9,7 @@ class AuthState extends Equatable {
     this.error,
   });
 
-  const AuthState.initial() : this(status: LoginStatus.unknown);
+  const AuthState.initial() : this(status: LoginStatus.initial);
 
   AuthState copyWith({
     LoginStatus? status,

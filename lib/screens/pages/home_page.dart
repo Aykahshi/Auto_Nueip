@@ -2,8 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:gl_nueip/bloc/auth/auth_cubit.dart';
 import 'package:gl_nueip/bloc/timer/timer_cubit.dart';
 import 'package:gl_nueip/bloc/user/user_cubit.dart';
+import 'package:gl_nueip/core/utils/enum.dart';
+import 'package:gl_nueip/core/utils/show_toast.dart';
 import 'package:gl_nueip/screens/widgets/calendar_widget.dart';
 import 'package:gl_nueip/screens/widgets/clock_button_widget.dart';
 import 'package:gl_nueip/screens/widgets/scaffold_with_action_widget.dart';
@@ -33,9 +36,11 @@ class HomePage extends StatelessWidget {
                           child: ShadCard(
                             backgroundColor: Colors.red.withOpacity(0.7),
                             child: FittedBox(
-                              child: Text('set_info_first'.tr(),
-                                  style: theme.textTheme.p
-                                      .copyWith(fontWeight: FontWeight.bold)),
+                              child: Text(
+                                'set_info_first'.tr(),
+                                style: theme.textTheme.p
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ),
@@ -45,20 +50,7 @@ class HomePage extends StatelessWidget {
                         Text('welcome'.tr(namedArgs: {'name': info.user.name}),
                             style: theme.textTheme.h3),
                         const Gap(20),
-                        BlocBuilder<TimeCubit, DateTime>(
-                          builder: (_, currentTime) {
-                            return FittedBox(
-                              child: Text(
-                                'time_now'.tr(namedArgs: {
-                                  'time': DateFormat('yyyy-MM-dd HH:mm:ss')
-                                      .format(currentTime)
-                                }),
-                                style: const TextStyle(
-                                    fontSize: 18, color: Colors.grey),
-                              ),
-                            );
-                          },
-                        ),
+                        const TimeClock(),
                         const Gap(20),
                       ],
                     ),
@@ -76,6 +68,45 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class TimeClock extends StatelessWidget {
+  const TimeClock({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TimeCubit(),
+      child: BlocBuilder<TimeCubit, DateTime>(
+        builder: (_, currentTime) {
+          return FittedBox(
+            child: Text(
+              'time_now'.tr(namedArgs: {
+                'time': DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime)
+              }),
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AuthListener extends StatelessWidget {
+  const AuthListener({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (_, state) => switch (state.status) {
+        LoginStatus.success =>
+          showToast('login.success'.tr(), Colors.green[600]!),
+        LoginStatus.failure => showToast('login.failed'.tr(), Colors.red[700]!),
+        _ => {},
+      },
     );
   }
 }

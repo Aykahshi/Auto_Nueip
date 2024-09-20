@@ -21,30 +21,22 @@ class UserCubit extends Cubit<UserState> {
     String? userId,
     String? password,
   }) async {
-    final int updatedFields = [company, name, userId, password]
-        .where((field) => field != null)
-        .length;
-
-    if (updatedFields == 4) {
-      emit(state.copyWith(
+    emit(
+      state.copyWith(
         user: User(
-          company: company!,
-          name: name!,
-          id: userId!,
-          password: password!,
+          company: company ?? state.user.company,
+          name: name ?? state.user.name,
+          id: userId ?? state.user.id,
+          password: password ?? state.user.password,
         ),
-      ));
-    } else {
-      emit(state.copyWith(
-        user: state.user.copyWith(
-          company: company,
-          name: name,
-          id: userId,
-          password: password,
-        ),
-      ));
-    }
+      ),
+    );
 
+    _saveState();
+  }
+
+  void saveUserNum(String number) {
+    emit(state.copyWith(user: state.user.copyWith(number: number)));
     _saveState();
   }
 

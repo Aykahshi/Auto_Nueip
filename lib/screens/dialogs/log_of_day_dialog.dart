@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:gl_nueip/bloc/daill_log/daily_log_cubit.dart';
+import 'package:gl_nueip/core/services/nueip_service.dart';
+import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class DayLog extends StatelessWidget {
-  const DayLog({super.key});
+  final String selectedDate;
+
+  const DayLog({super.key, required this.selectedDate});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,28 @@ class DayLog extends StatelessWidget {
               decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(20))),
               height: 180,
-              child: const DayLogContent(),
+              child: FutureBuilder(
+                future: locator<NueipService>().getDailyLogs(selectedDate),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(
+                              color: Colors.lightBlueAccent),
+                        ),
+                        const Gap(20),
+                        Text('log.loading'.tr(),
+                            style: const TextStyle(fontSize: 18)),
+                      ],
+                    );
+                  }
+                  return const DayLogContent();
+                },
+              ),
             ),
           ),
         ),
@@ -43,24 +68,12 @@ class DayLogContent extends StatelessWidget {
     return BlocBuilder<DailyLogCubit, DailyLogState>(
       builder: (_, state) {
         switch (state) {
-          case DailyLogLoading():
-            return Column(
-              children: [
-                const SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: CircularProgressIndicator(strokeWidth: 10),
-                ),
-                const Gap(20),
-                Text('log.loading'.tr(), style: const TextStyle(fontSize: 18)),
-              ],
-            );
           case DailyLogTimeOff():
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.code_off_outlined,
+                  Icons.work_off_outlined,
                   size: 80,
                   color: Colors.white70,
                 ),
@@ -110,8 +123,34 @@ class DayLogContent extends StatelessWidget {
                 Text('log.no_logs'.tr()),
               ],
             );
+          case DailyLogError():
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.running_with_errors_outlined,
+                  size: 80,
+                  color: Colors.white70,
+                ),
+                const Gap(20),
+                Text('log.error'.tr()),
+              ],
+            );
           default:
-            return Text('error.common'.tr());
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(
+                    color: Colors.lightBlueAccent,
+                  ),
+                ),
+                const Gap(20),
+                Text('log.loading'.tr(), style: const TextStyle(fontSize: 18)),
+              ],
+            );
         }
       },
     );

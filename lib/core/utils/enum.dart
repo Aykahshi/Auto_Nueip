@@ -9,7 +9,7 @@ enum ClockAction {
 enum LoginStatus {
   success,
   failure,
-  unknown,
+  initial,
 }
 
 enum ClickButton {

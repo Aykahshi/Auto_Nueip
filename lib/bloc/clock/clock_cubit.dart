@@ -41,7 +41,7 @@ class ClockCubit extends Cubit<ClockState> {
     );
   }
 
-  void failed(String error) {
+  void failed() {
     emit(
       state.copyWith(
         status: ClockAction.failed,

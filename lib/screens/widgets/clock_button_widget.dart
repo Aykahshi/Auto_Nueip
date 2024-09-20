@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:gl_nueip/bloc/clock/clock_cubit.dart';
+import 'package:gl_nueip/core/services/notification_service.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/enum.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
@@ -15,6 +16,7 @@ class ClockButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NueipService service = locator<NueipService>();
+    final NotificationService notification = locator<NotificationService>();
 
     return BlocConsumer<ClockCubit, ClockState>(
       listener: (context, state) {
@@ -36,7 +38,10 @@ class ClockButton extends StatelessWidget {
               width: 150,
               height: 80,
               padding: const EdgeInsets.symmetric(horizontal: 3),
-              onPressed: () => service.clockIn(),
+              onPressed: () {
+                service.clockIn();
+                notification.checkClockedOrNot();
+              },
               child: _buildButtonChild(
                 context: context,
                 method: 'in',
@@ -49,7 +54,10 @@ class ClockButton extends StatelessWidget {
               width: 150,
               height: 80,
               padding: const EdgeInsets.symmetric(horizontal: 3),
-              onPressed: () => service.clockOut(),
+              onPressed: () {
+                service.clockOut();
+                notification.checkClockedOrNot();
+              },
               child: _buildButtonChild(
                 context: context,
                 method: 'out',

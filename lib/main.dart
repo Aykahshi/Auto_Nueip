@@ -1,16 +1,10 @@
 import 'package:easy_localization_loader/easy_localization_loader.dart';
-import 'package:gl_nueip/bloc/daill_log/daily_log_cubit.dart';
-import 'package:gl_nueip/bloc/lang/lang_cubit.dart';
+import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:preferences_local_storage_inspector/preferences_local_storage_inspector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:gl_nueip/bloc/auth/auth_cubit.dart';
-import 'package:gl_nueip/bloc/clock/clock_cubit.dart';
-import 'package:gl_nueip/bloc/remind/remind_cubit.dart';
-import 'package:gl_nueip/bloc/timer/timer_cubit.dart';
-import 'package:gl_nueip/bloc/user/user_cubit.dart';
 import 'package:gl_nueip/core/services/notification_service.dart';
 import 'package:gl_nueip/screens/pages/home_page.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
@@ -27,7 +21,9 @@ void main() async {
   await NotificationService.init();
   await locator<NotificationService>().checkNotificationsEnabled();
   await locator<NotificationService>().checkClockedOrNot();
-  await locator<NueipService>().checkStatus();
+  if (locator<UserCubit>().isNotDefault()) {
+    await locator<NueipService>().checkStatus();
+  }
 
   final driver = StorageServerDriver(
     bundleId: 'com.glsoft.glnueip',
@@ -66,7 +62,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => locator<DailyLogCubit>()),
         BlocProvider(create: (_) => locator<AuthCubit>()),
         BlocProvider(create: (_) => locator<LangCubit>()),
-        BlocProvider(create: (_) => locator<TimeCubit>()),
       ],
       child: KeyboardDismissOnTap(
         dismissOnCapturedTaps: true,

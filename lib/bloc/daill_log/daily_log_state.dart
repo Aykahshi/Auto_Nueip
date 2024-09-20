@@ -9,12 +9,12 @@ final class DailyLogInitial extends DailyLogState {
   List<Object> get props => [];
 }
 
-final class DailyLogLoading extends DailyLogState {
+final class DailyLogEmpty extends DailyLogState {
   @override
   List<Object> get props => [];
 }
 
-final class DailyLogEmpty extends DailyLogState {
+final class DailyLogError extends DailyLogState {
   @override
   List<Object> get props => [];
 }

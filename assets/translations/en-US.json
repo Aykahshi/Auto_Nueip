@@ -73,6 +73,10 @@
     "id": "UserID",
     "password": "Password"
   },
+  "login": {
+    "success": "Login Success！",
+    "failed": "Login Failed. Please check your user info."
+  },
   "placeholder": {
     "company": "Enter your company name",
     "name": "Enter your name",

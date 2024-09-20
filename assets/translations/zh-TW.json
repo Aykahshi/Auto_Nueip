@@ -53,7 +53,7 @@
     "out": "下班"
   },
   "time_off": {
-    "title": "今天請假：假別：{type}",
+    "title": "今天請假！假別：{type}",
     "al":"休假",
     "sl":"病假",
     "ml1":"婚假",
@@ -73,6 +73,10 @@
     "name": "使用者名稱",
     "id": "員工編號",
     "password": "密碼"
+  },
+  "login": {
+    "success": "登入成功！",
+    "failed": "登入失敗！請確認使用者資料！"
   },
   "placeholder": {
     "company": "請輸入公司編號",

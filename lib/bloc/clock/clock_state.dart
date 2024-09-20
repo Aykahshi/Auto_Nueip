@@ -2,7 +2,6 @@ part of 'clock_cubit.dart';
 
 class ClockState extends Equatable {
   final ClockAction status;
-  final String? error;
   final ClickButton button;
   final String? clockInTime;
   final String? clockOutTime;
@@ -13,7 +12,6 @@ class ClockState extends Equatable {
     required this.status,
     this.clockInTime,
     this.clockOutTime,
-    this.error,
     this.isClockedIn = false,
     this.isClockedOut = false,
     required this.button,
@@ -29,7 +27,6 @@ class ClockState extends Equatable {
 
   ClockState copyWith({
     ClockAction? status,
-    String? error,
     String? clockInTime,
     String? clockOutTime,
     ClickButton? button,
@@ -38,7 +35,6 @@ class ClockState extends Equatable {
   }) {
     return ClockState(
       status: status ?? this.status,
-      error: error ?? this.error,
       clockInTime: clockInTime ?? this.clockInTime,
       clockOutTime: clockOutTime ?? this.clockOutTime,
       button: button ?? this.button,
@@ -50,7 +46,6 @@ class ClockState extends Equatable {
   @override
   List<Object?> get props => [
         status,
-        error,
         clockInTime,
         clockOutTime,
         button,

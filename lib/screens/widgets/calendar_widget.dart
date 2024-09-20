@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gl_nueip/bloc/lang/lang_cubit.dart';
-import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/enum.dart';
-import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/screens/dialogs/log_of_day_dialog.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -55,10 +53,9 @@ class _WorklogCalendarState extends State<WorklogCalendar> {
             });
             final String dayForWorklog =
                 _selectedDay.toString().split(' ').first;
-            await locator<NueipService>().getDailyLogs(dayForWorklog);
             showShadDialog(
               context: context,
-              builder: (_) => const DayLog(),
+              builder: (_) => DayLog(selectedDate: dayForWorklog),
             );
           },
           onPageChanged: (focusedDay) {

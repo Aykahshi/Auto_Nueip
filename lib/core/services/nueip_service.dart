@@ -1,20 +1,13 @@
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:gl_nueip/bloc/auth/auth_cubit.dart';
-import 'package:gl_nueip/bloc/clock/clock_cubit.dart';
 import 'package:dio/dio.dart';
-import 'package:gl_nueip/bloc/daill_log/daily_log_cubit.dart';
-import 'package:gl_nueip/bloc/user/user_cubit.dart';
+import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
 import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/models/location_model.dart';
 import 'package:gl_nueip/core/models/user_model.dart';
-import 'package:gl_nueip/core/utils/custom_transformer.dart';
-import 'package:gl_nueip/core/utils/extract_token.dart';
-import 'package:gl_nueip/core/utils/injection_container.dart';
-import 'package:gl_nueip/core/utils/time_format.dart';
-import 'package:gl_nueip/core/utils/parse_cookies.dart';
+import 'package:gl_nueip/core/utils/utils.dart';
 
 class NueipService {
   late final CookieJar _cookieJar;
@@ -22,7 +15,6 @@ class NueipService {
   late final String? _redirectUrl;
   late final String _cookieHeader;
   late final String _token;
-  late final String _userNum;
   final String _loginUrl = '${CurlConfig.baseUrl}/login/index/param';
   final AuthCubit _authCubit = locator<AuthCubit>();
   final ClockCubit _clockCubit = locator<ClockCubit>();
@@ -33,7 +25,7 @@ class NueipService {
     _dio = Dio(BaseOptions(headers: CurlConfig.headers, followRedirects: false))
       ..interceptors.add(CookieManager(_cookieJar))
       ..transformer = CustomTransformer()
-      ..options.validateStatus = (status) => status! < 400;
+      ..options.validateStatus = (statusCode) => statusCode! < 400;
   }
 
   Future<void> clockIn() async {
@@ -46,7 +38,7 @@ class NueipService {
     if (logData.status == 'success') {
       _clockCubit.clockIn(logData.time);
     } else {
-      _clockCubit.failed('error.clock_in_failed'.tr());
+      _clockCubit.failed();
     }
   }
 
@@ -60,37 +52,37 @@ class NueipService {
     if (logData.status == 'success') {
       _clockCubit.clockOut(logData.time);
     } else {
-      _clockCubit.failed('error.clock_out_failed'.tr());
+      _clockCubit.failed();
     }
   }
 
   Future<void> _fetchNueip() async {
-    try {
-      final Response response = await _login();
-      if (response.statusCode != 303) {
-        _authCubit.loginFailed('error.login_failed'.tr());
-      }
-
-      _redirectUrl = response.headers['location']?.first ?? '';
-
-      if (_redirectUrl!.contains('/home')) {
-        _authCubit.loginSuccess();
-        await _getCookieHeader();
-        await _getCrsfToken();
-      }
-    } catch (e) {
-      _authCubit.loginFailed('error.common'.tr());
+    await login();
+    if (_redirectUrl!.contains('/home')) {
+      await _getCookieHeader();
+      await _getCrsfToken();
     }
   }
 
-  Future<Response> _login() async {
+  Future<void> login() async {
     final CurlBody body = {
       'inputCompany': _userInfo.company,
       'inputID': _userInfo.id,
       'inputPassword': _userInfo.password,
     };
 
-    return await _dio.post(_loginUrl, data: body);
+    try {
+      final Response response = await _dio.post(_loginUrl, data: body);
+      if (response.statusCode != 303) {
+        _authCubit.loginFailed('error.login_failed'.tr());
+      }
+      _redirectUrl = response.headers['location']?.first ?? '';
+      if (_redirectUrl!.contains('/home')) {
+        _authCubit.loginSuccess();
+      }
+    } catch (e) {
+      _authCubit.loginFailed('error.common'.tr());
+    }
   }
 
   Future<void> _getCookieHeader() async {
@@ -142,8 +134,8 @@ class NueipService {
     }
   }
 
-  Future<String> getOauthToken() async {
-    await _login();
+  Future<String> _getOauthToken() async {
+    await login();
     try {
       final Response response = await _dio.get(
         '${CurlConfig.baseUrl}/oauth2/token/api',
@@ -156,8 +148,8 @@ class NueipService {
     }
   }
 
-  Future<ClockedTime?> getClockTime() async {
-    final String accessToken = await getOauthToken();
+  Future<ClockedTime?> _getClockTime() async {
+    final String accessToken = await _getOauthToken();
     if (accessToken != '') {
       try {
         final Response response = await _dio.get(
@@ -168,7 +160,7 @@ class NueipService {
         final Map<String, dynamic> user = response.data['data']['user'];
         final String? clockInTime = user['A1'];
         final String? clockOutTime = user['A2'];
-        _userNum = user['u_no'];
+        locator<UserCubit>().saveUserNum(user['u_no']);
         return (clockInTime, clockOutTime);
       } catch (e) {
         print('Failed to get clock logs: $e');
@@ -178,12 +170,13 @@ class NueipService {
   }
 
   Future<void> checkStatus() async {
-    final ClockedTime? clockedTime = await getClockTime();
+    final ClockedTime? clockedTime = await _getClockTime();
     _clockCubit.initStatus(clockedTime);
   }
 
   Future<void> getDailyLogs(String date) async {
-    await _login();
+    await login();
+    final String? userNum = locator<UserCubit>().state.user.number;
 
     final DailyLogCubit dailyLogCubit = locator<DailyLogCubit>();
     final formData = {
@@ -202,36 +195,37 @@ class NueipService {
           'Cookie': 'Search_42_date_start=$date; Search_42_date_end=$date;'
         }),
       );
-
-      final logData = response.data['data'][date][_userNum];
-      if (logData['timeoff'] == null && logData['punch'] == null) {
-        dailyLogCubit.hasNoLogs();
-      }
-      if (logData['timeoff'] != null) {
-        dailyLogCubit.hasTimeOff(
-            timeOffType: logData['timeoff'].first['rule_name']);
-      }
-      if (logData['punch'] != null) {
-        final clockLogs = logData['punch'];
-        final List<WorkLog> workLogs = [];
-
-        if (clockLogs['onPunch'] != null) {
-          workLogs.add((
-            time: clockLogs['onPunch'].first['time'],
-            status: 'status.clock_in'.tr()
-          ));
-        }
-        if (clockLogs['offPunch'] != null) {
-          workLogs.add((
-            time: clockLogs['offPunch'].first['time'],
-            status: 'status.clock_out'.tr()
-          ));
+      if (userNum != null) {
+        final logData = response.data['data'][date][userNum];
+        if (logData['timeoff'] == null && logData['punch'] == null) {
+          dailyLogCubit.hasNoLogs();
         }
 
-        dailyLogCubit.hasWorked(workLogs: workLogs);
+        if (logData['timeoff'] != null) {
+          final String timeOffName = logData['timeoff'].first['rule_name'];
+          dailyLogCubit.hasTimeOff(timeOffType: timeOffName);
+        } else if (logData['punch'] != null) {
+          final clockLogs = logData['punch'];
+          final List<WorkLog> workLogs = [];
+
+          if (clockLogs['onPunch'] != null) {
+            workLogs.add((
+              time: clockLogs['onPunch'].first['time'],
+              status: 'status.clock_in'.tr()
+            ));
+          }
+          if (clockLogs['offPunch'] != null) {
+            workLogs.add((
+              time: clockLogs['offPunch'].first['time'],
+              status: 'status.clock_out'.tr()
+            ));
+          }
+          dailyLogCubit.hasWorked(workLogs: workLogs);
+        }
       }
     } catch (e) {
-      dailyLogCubit.hasNoLogs();
+      print('Failed to get daily logs: $e');
+      dailyLogCubit.hasError();
     }
   }
 }

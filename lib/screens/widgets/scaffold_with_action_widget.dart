@@ -14,11 +14,11 @@ class ScaffoldWithAction extends StatelessWidget {
       appBar: AppBar(
         title: const ShadImage(
           Assets.header,
-          width: 230,
+          width: 170,
           fit: BoxFit.fitHeight,
         ),
         centerTitle: true,
-        toolbarHeight: 100,
+        toolbarHeight: 80,
         elevation: 0.5,
         actions: [
           IconButton(

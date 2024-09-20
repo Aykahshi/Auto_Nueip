@@ -9,12 +9,12 @@ typedef WorkLog = ({String time, String status});
 class DailyLogCubit extends Cubit<DailyLogState> {
   DailyLogCubit() : super(DailyLogInitial());
 
-  void isLoading() {
-    emit(DailyLogLoading());
-  }
-
   void hasNoLogs() {
     emit(DailyLogEmpty());
+  }
+
+  void hasError() {
+    emit(DailyLogError());
   }
 
   void hasWorked({required List<WorkLog> workLogs}) {
@@ -23,7 +23,6 @@ class DailyLogCubit extends Cubit<DailyLogState> {
 
   void hasTimeOff({required String timeOffType}) {
     final String timeOffName;
-
     switch (timeOffType) {
       case '事假':
         timeOffName = 'time_off.pl'.tr();
@@ -40,7 +39,6 @@ class DailyLogCubit extends Cubit<DailyLogState> {
       default:
         timeOffName = 'time_off.other'.tr();
     }
-
     emit(DailyLogTimeOff(timeOffType: timeOffName));
   }
 }
