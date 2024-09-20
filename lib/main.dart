@@ -1,4 +1,5 @@
 import 'package:easy_localization_loader/easy_localization_loader.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:preferences_local_storage_inspector/preferences_local_storage_inspector.dart';
@@ -25,14 +26,16 @@ void main() async {
     await locator<NueipService>().checkStatus();
   }
 
-  final driver = StorageServerDriver(
-    bundleId: 'com.glsoft.glnueip',
-    port: 0,
-  );
-  final prefServer =
-      PreferencesKeyValueServer(locator<SharedPreferences>(), 'Preferences');
-  driver.addKeyValueServer(prefServer);
-  await driver.start(paused: false);
+  if (kDebugMode) {
+    final driver = StorageServerDriver(
+      bundleId: 'com.glsoft.glnueip',
+      port: 0,
+    );
+    final prefServer =
+        PreferencesKeyValueServer(locator<SharedPreferences>(), 'Preferences');
+    driver.addKeyValueServer(prefServer);
+    await driver.start(paused: false);
+  }
 
   runApp(
     EasyLocalization(
@@ -41,7 +44,7 @@ void main() async {
         Locale('zh', 'TW'),
       ],
       startLocale: locator<LangCubit>().currentLocale,
-      fallbackLocale: const Locale('en', 'US'),
+      fallbackLocale: const Locale('zh', 'TW'),
       path: 'assets/translations',
       assetLoader: const JsonAssetLoader(),
       child: const MyApp(),
@@ -56,11 +59,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => locator<AuthCubit>()),
         BlocProvider(create: (_) => locator<RemindCubit>()),
         BlocProvider(create: (_) => locator<UserCubit>()),
         BlocProvider(create: (_) => locator<ClockCubit>()),
         BlocProvider(create: (_) => locator<DailyLogCubit>()),
-        BlocProvider(create: (_) => locator<AuthCubit>()),
         BlocProvider(create: (_) => locator<LangCubit>()),
       ],
       child: KeyboardDismissOnTap(

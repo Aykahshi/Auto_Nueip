@@ -12,7 +12,7 @@ class InfoForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
-    savaUserInfo() {
+    void savaUserInfo() {
       if (formKey.currentState!.saveAndValidate()) {
         final formData = formKey.currentState!.value;
         context.read<UserCubit>().saveAll(
@@ -44,9 +44,7 @@ class InfoForm extends StatelessWidget {
             ShadButton.secondary(
               width: 100,
               child: Text('button.clear'.tr()),
-              onPressed: () {
-                formKey.currentState!.reset();
-              },
+              onPressed: () => formKey.currentState!.reset(),
             ),
             ShadButton(
               width: 100,
@@ -74,7 +72,7 @@ class FormFields extends StatelessWidget {
         ShadForm(
           key: formKey,
           child: BlocBuilder<UserCubit, UserState>(
-            builder: (context, state) {
+            builder: (_, state) {
               return Column(
                 children: _buildFormFields(),
               );
@@ -86,29 +84,48 @@ class FormFields extends StatelessWidget {
     );
   }
 
-  List<ShadInputFormField> _buildFormFields() {
-    final List<Map<String, dynamic>> fields = [
-      {'id': 'name', 'label': 'form.name', 'placeholder': 'placeholder.name'},
-      {
-        'id': 'company',
-        'label': 'form.company',
-        'placeholder': 'placeholder.company'
-      },
-      {'id': 'id', 'label': 'form.id', 'placeholder': 'placeholder.id'},
-      {
-        'id': 'password',
-        'label': 'form.password',
-        'placeholder': 'placeholder.password',
-        'obscureText': true
-      },
+  List<Widget> _buildFormFields() {
+    final ValueNotifier<bool> obscure = ValueNotifier(false);
+
+    return [
+      ShadInputFormField(
+        id: 'name',
+        label: Text('form.name'.tr()),
+        placeholder: Text('placeholder.name'.tr()),
+      ),
+      ShadInputFormField(
+        id: 'company',
+        label: Text('form.company'.tr()),
+        placeholder: Text('placeholder.company'.tr()),
+      ),
+      ShadInputFormField(
+        id: 'id',
+        label: Text('form.id'.tr()),
+        placeholder: Text('placeholder.id'.tr()),
+      ),
+      ValueListenableBuilder(
+        valueListenable: obscure,
+        builder: (BuildContext context, value, Widget? child) {
+          return ShadInputFormField(
+            id: 'password',
+            label: Text('form.password'.tr()),
+            placeholder: Text('placeholder.password'.tr()),
+            obscureText: obscure.value,
+            suffix: ShadButton.ghost(
+              width: 20,
+              height: 20,
+              onPressed: () => obscure.value = !obscure.value,
+              icon: Icon(
+                obscure.value
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 20,
+                color: Colors.grey,
+              ),
+            ),
+          );
+        },
+      )
     ];
-    return fields.map((field) {
-      return ShadInputFormField(
-        id: field['id'],
-        label: Text(field['label']).tr(),
-        placeholder: Text(field['placeholder']).tr(),
-        obscureText: field['obscureText'] ?? false,
-      );
-    }).toList();
   }
 }

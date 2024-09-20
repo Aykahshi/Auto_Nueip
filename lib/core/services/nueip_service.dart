@@ -2,6 +2,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
 import 'package:gl_nueip/core/models/log_response_model.dart';
@@ -57,14 +58,14 @@ class NueipService {
   }
 
   Future<void> _fetchNueip() async {
-    await login();
+    await _login();
     if (_redirectUrl!.contains('/home')) {
       await _getCookieHeader();
       await _getCrsfToken();
     }
   }
 
-  Future<void> login() async {
+  Future<void> _login() async {
     final CurlBody body = {
       'inputCompany': _userInfo.company,
       'inputID': _userInfo.id,
@@ -135,7 +136,7 @@ class NueipService {
   }
 
   Future<String> _getOauthToken() async {
-    await login();
+    await _login();
     try {
       final Response response = await _dio.get(
         '${CurlConfig.baseUrl}/oauth2/token/api',
@@ -143,7 +144,9 @@ class NueipService {
       final String accessToken = response.data['token_access_token'];
       return accessToken;
     } catch (e) {
-      print('Failed to get oauth token: $e');
+      if (kDebugMode) {
+        print('Failed to get oauth token: $e');
+      }
       return '';
     }
   }
@@ -163,7 +166,9 @@ class NueipService {
         locator<UserCubit>().saveUserNum(user['u_no']);
         return (clockInTime, clockOutTime);
       } catch (e) {
-        print('Failed to get clock logs: $e');
+        if (kDebugMode) {
+          print('Failed to get clock logs: $e');
+        }
       }
     }
     return null;
@@ -175,7 +180,7 @@ class NueipService {
   }
 
   Future<void> getDailyLogs(String date) async {
-    await login();
+    await _login();
     final String? userNum = locator<UserCubit>().state.user.number;
 
     final DailyLogCubit dailyLogCubit = locator<DailyLogCubit>();
@@ -224,7 +229,9 @@ class NueipService {
         }
       }
     } catch (e) {
-      print('Failed to get daily logs: $e');
+      if (kDebugMode) {
+        print('Failed to get daily logs: $e');
+      }
       dailyLogCubit.hasError();
     }
   }
