@@ -52,7 +52,6 @@ class ClockCubit extends Cubit<ClockState> {
 
   void initStatus(ClockedTime? logTime) async {
     emit(state.copyWith(status: ClockAction.idle));
-    Future.delayed(const Duration(seconds: 1));
 
     final ClockedTime? workTime = logTime;
     final String? clockInTime = workTime?.$1;

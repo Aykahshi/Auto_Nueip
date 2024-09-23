@@ -2,11 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:gl_nueip/bloc/auth/auth_cubit.dart';
 import 'package:gl_nueip/bloc/timer/timer_cubit.dart';
 import 'package:gl_nueip/bloc/user/user_cubit.dart';
-import 'package:gl_nueip/core/utils/enum.dart';
-import 'package:gl_nueip/core/utils/show_toast.dart';
 import 'package:gl_nueip/screens/widgets/calendar_widget.dart';
 import 'package:gl_nueip/screens/widgets/clock_button_widget.dart';
 import 'package:gl_nueip/screens/widgets/scaffold_with_action_widget.dart';
@@ -91,22 +88,6 @@ class TimeClock extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class AuthListener extends StatelessWidget {
-  const AuthListener({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (_, state) => switch (state.status) {
-        LoginStatus.success =>
-          showToast('login.success'.tr(), Colors.green[600]!),
-        LoginStatus.failure => showToast('login.failed'.tr(), Colors.red[700]!),
-        _ => {},
-      },
     );
   }
 }

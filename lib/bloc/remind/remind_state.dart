@@ -7,10 +7,6 @@ class RemindState extends Equatable {
 
   const RemindState.initial() : this(isEnabled: false);
 
-  RemindState copyWith({bool? isEnabled}) {
-    return RemindState(isEnabled: isEnabled ?? this.isEnabled);
-  }
-
   @override
   List<Object> get props => [isEnabled];
 }

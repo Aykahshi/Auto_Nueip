@@ -19,7 +19,7 @@ class RemindCubit extends Cubit<RemindState> {
     bool hasPermission =
         await locator<NotificationService>().checkNotificationPermission();
     if (hasPermission) {
-      emit(state.copyWith(isEnabled: !state.isEnabled));
+      emit(RemindState(isEnabled: !state.isEnabled));
       _saveState();
     }
   }

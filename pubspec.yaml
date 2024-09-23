@@ -40,6 +40,7 @@ dependencies:
   dio: ^5.7.0
   cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1
+  pretty_dio_logger: ^1.4.0
 
   # State and Storage
   get_it: ^7.7.0

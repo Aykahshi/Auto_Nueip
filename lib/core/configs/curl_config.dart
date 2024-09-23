@@ -1,7 +1,12 @@
 typedef CurlBody = Map<String, String>;
 
 class CurlConfig {
-  static const String baseUrl = 'https://cloud.nueip.com';
+  static const String BASE_URL = 'https://cloud.nueip.com';
+  static const String LOGIN_URL = '$BASE_URL/login/index/param';
+  static const String CLOCK_URL = '$BASE_URL/time_clocks/ajax';
+  static const String TOKEN_URL = '$BASE_URL/oauth2/token/api';
+  static const String RECORD_URL = '$BASE_URL/portal/Portal_punch_clock/ajax';
+  static const String DAILY_LOG_URL = '$BASE_URL/attendance_record/ajax';
   static const Map<String, String> headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent':
