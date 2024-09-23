@@ -18,7 +18,7 @@ Future<void> setupDependencies() async {
     ..registerSingleton<UserCubit>(UserCubit(prefs))
     ..registerSingleton<RemindCubit>(RemindCubit(prefs))
     ..registerSingleton<LangCubit>(LangCubit(prefs))
-    ..registerLazySingleton<AuthCubit>(() => AuthCubit())
+    ..registerLazySingleton<AuthCubit>(() => AuthCubit(prefs))
     ..registerLazySingleton<TimeCubit>(() => TimeCubit())
     // Services
     ..registerLazySingleton<NueipService>(() => NueipService())

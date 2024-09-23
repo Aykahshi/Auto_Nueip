@@ -5,26 +5,31 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
+import 'package:gl_nueip/core/models/auth_headers_model.dart';
+import 'package:gl_nueip/core/models/auth_session_model.dart';
 import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/models/location_model.dart';
-import 'package:gl_nueip/core/models/user_model.dart';
 import 'package:gl_nueip/core/utils/utils.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class NueipService {
   late final CookieJar _cookieJar;
   late final Dio _dio;
   late final String? _redirectUrl;
-  late final String _cookieHeader;
-  late final String _token;
-  final String _loginUrl = '${CurlConfig.baseUrl}/login/index/param';
   final AuthCubit _authCubit = locator<AuthCubit>();
   final ClockCubit _clockCubit = locator<ClockCubit>();
-  final User _userInfo = locator<UserCubit>().state.user;
+  final UserCubit _userCubit = locator<UserCubit>();
 
   NueipService() {
     _cookieJar = CookieJar();
     _dio = Dio(BaseOptions(headers: CurlConfig.headers, followRedirects: false))
       ..interceptors.add(CookieManager(_cookieJar))
+      // ..interceptors.add(PrettyDioLogger(
+      //   requestHeader: true,
+      //   requestBody: true,
+      //   responseBody: true,
+      //   responseHeader: false,
+      // ))
       ..transformer = CustomTransformer()
       ..options.validateStatus = (statusCode) => statusCode! < 400;
   }
@@ -33,7 +38,6 @@ class NueipService {
     _clockCubit
       ..loading()
       ..clockInClick();
-    await _fetchNueip();
     var json = await _clockAction('1');
     final LogResponse logData = LogResponse.fromJson(json);
     if (logData.status == 'success') {
@@ -47,7 +51,6 @@ class NueipService {
     _clockCubit
       ..loading()
       ..clockOutClick();
-    await _fetchNueip();
     var json = await _clockAction('2');
     final LogResponse logData = LogResponse.fromJson(json);
     if (logData.status == 'success') {
@@ -57,58 +60,69 @@ class NueipService {
     }
   }
 
-  Future<void> _fetchNueip() async {
-    await _login();
-    if (_redirectUrl!.contains('/home')) {
-      await _getCookieHeader();
-      await _getCrsfToken();
-    }
-  }
-
   Future<void> _login() async {
     final CurlBody body = {
-      'inputCompany': _userInfo.company,
-      'inputID': _userInfo.id,
-      'inputPassword': _userInfo.password,
+      'inputCompany': _userCubit.state.user.company,
+      'inputID': _userCubit.state.user.id,
+      'inputPassword': _userCubit.state.user.password,
     };
 
     try {
-      final Response response = await _dio.post(_loginUrl, data: body);
-      if (response.statusCode != 303) {
-        _authCubit.loginFailed();
-      }
+      final Response response =
+          await _dio.post(CurlConfig.LOGIN_URL, data: body);
+      if (response.statusCode != 303) _authCubit.loginFailed();
+
       _redirectUrl = response.headers['location']?.first ?? '';
+
+      if (_redirectUrl == '') _authCubit.loginFailed();
+
       if (_redirectUrl!.contains('/home')) {
-        _authCubit.loginSuccess();
+        final String cookieHeader = await _getCookieHeader();
+        final String csrfToken =
+            await _getCrsfToken(cookieHeader: cookieHeader);
+        _authCubit.loginSuccess(
+          AuthHeaders(cookie: cookieHeader, csrfToken: csrfToken),
+        );
       }
     } catch (e) {
       _authCubit.loginFailed();
     }
   }
 
-  Future<void> _getCookieHeader() async {
+  Future<void> _checkAuth() async {
+    bool needsRefresh = false;
     final List<Cookie> cookies =
-        await _cookieJar.loadForRequest(Uri.parse(_loginUrl));
-    _cookieHeader = parseCookies(cookies);
+        await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
+    for (final Cookie cookie in cookies) {
+      if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
+        needsRefresh = true;
+        break;
+      }
+    }
+    if (_authCubit.state.headers?.csrfToken == null) needsRefresh = true;
+    if (needsRefresh) await _login();
   }
 
-  Future<void> _getCrsfToken() async {
-    try {
-      final Response response = await _dio.get(
-        _redirectUrl!,
-        options: Options(headers: {'Cookie': _cookieHeader}),
-      );
-      if (response.statusCode == 200) {
-        _token = extractToken(response.data);
-      }
-    } catch (e) {
-      _authCubit.loginFailed();
-    }
+  Future<String> _getCookieHeader() async {
+    final List<Cookie> cookies =
+        await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
+    final String cookieHeader = parseCookies(cookies);
+    return cookieHeader;
+  }
+
+  Future<String> _getCrsfToken({required String cookieHeader}) async {
+    final Response response = await _dio.get(
+      _redirectUrl!,
+      options: Options(headers: {'Cookie': cookieHeader}),
+    );
+    final String csrfToken = extractToken(response.data);
+    return csrfToken;
   }
 
   Future<dynamic> _clockAction(String method) async {
-    const String clockUrl = '${CurlConfig.baseUrl}/time_clocks/ajax';
     final String timeStamp = timeFormat(DateTime.now());
+    final String? cookieHeader = _authCubit.state.headers!.cookie;
+    final String? csrfToken = _authCubit.state.headers!.csrfToken;
     const Location location =
         Location(latitude: '22.6282043', longitude: '120.2930865');
 
@@ -116,72 +130,76 @@ class NueipService {
       'action': 'add',
       'id': method,
       'attendance_time': timeStamp,
-      'token': _token,
+      'token': csrfToken,
       'lat': location.latitude,
       'lng': location.longitude,
     };
 
-    try {
-      final Response response = await _dio.post(
-        clockUrl,
-        data: formData,
-        options: Options(
-          headers: {'Cookie': _cookieHeader},
-        ),
-      );
-      return response.data;
-    } catch (e) {
-      throw Exception('Error：${e.toString()}');
-    }
+    final Response response = await _dio.post(CurlConfig.CLOCK_URL,
+        data: formData, options: Options(headers: {'Cookie': cookieHeader}));
+    return response.data;
   }
 
-  Future<String> _getOauthToken() async {
-    await _login();
+  Future<void> _checkTokenExpired() async {
+    if (_authCubit.state.session == null) await _authCubit.checkAuthState();
+    final bool needsRefresh = _authCubit.state.session!.isTokenExpired();
+    if (needsRefresh) await _getOauthToken();
+  }
+
+  Future<void> _getOauthToken() async {
     try {
-      final Response response = await _dio.get(
-        '${CurlConfig.baseUrl}/oauth2/token/api',
-      );
+      final Response response = await _dio.get(CurlConfig.TOKEN_URL,
+          options:
+              Options(headers: {'Cookie': _authCubit.state.headers!.cookie}));
       final String accessToken = response.data['token_access_token'];
-      return accessToken;
+      final int expiresIn = response.data['token_expires_in'] as int;
+      final DateTime expiryTime =
+          DateTime.now().add(Duration(seconds: expiresIn));
+      _authCubit.saveAuthSession(AuthSession(
+        accessToken: accessToken,
+        expiryTime: expiryTime,
+      ));
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to get oauth token: $e');
-      }
-      return '';
+      if (kDebugMode) print('Failed to get oauth token: $e');
     }
   }
 
   Future<ClockedTime?> _getClockTime() async {
-    final String accessToken = await _getOauthToken();
-    if (accessToken != '') {
+    final String? accessToken = _authCubit.state.session?.accessToken;
+    if (kDebugMode) print('accessToken: $accessToken');
+    if (accessToken != null) {
       try {
         final Response response = await _dio.get(
-          '${CurlConfig.baseUrl}/portal/Portal_punch_clock/ajax',
-          options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+          CurlConfig.RECORD_URL,
+          options: Options(headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Cookie': _authCubit.state.headers!.cookie,
+          }),
           queryParameters: {'type': 'view'},
         );
         final Map<String, dynamic> user = response.data['data']['user'];
         final String? clockInTime = user['A1'];
         final String? clockOutTime = user['A2'];
-        locator<UserCubit>().saveUserNum(user['u_no']);
+        _userCubit.saveUserNum(user['u_no']);
         return (clockInTime, clockOutTime);
       } catch (e) {
-        if (kDebugMode) {
-          print('Failed to get clock logs: $e');
-        }
+        if (kDebugMode) print('Failed to get clock logs: $e');
       }
     }
     return null;
   }
 
   Future<void> checkStatus() async {
+    await _checkAuth();
+    await _checkTokenExpired();
+    if (kDebugMode) print('Checking Status Completed');
     final ClockedTime? clockedTime = await _getClockTime();
+    if (kDebugMode) print('Get Clock Time Completed: $clockedTime');
     _clockCubit.initStatus(clockedTime);
   }
 
   Future<void> getDailyLogs(String date) async {
-    await _login();
-    final String? userNum = locator<UserCubit>().state.user.number;
+    final String? userNum = _userCubit.state.user.number;
 
     final DailyLogCubit dailyLogCubit = locator<DailyLogCubit>();
     final formData = {
@@ -194,10 +212,11 @@ class NueipService {
 
     try {
       final Response response = await _dio.post(
-        '${CurlConfig.baseUrl}/attendance_record/ajax',
+        CurlConfig.DAILY_LOG_URL,
         data: formData,
         options: Options(headers: {
-          'Cookie': 'Search_42_date_start=$date; Search_42_date_end=$date;'
+          'Cookie':
+              'Search_42_date_start=$date; Search_42_date_end=$date; ${_authCubit.state.headers!.cookie}'
         }),
       );
       if (userNum != null) {
@@ -227,12 +246,11 @@ class NueipService {
           }
           dailyLogCubit.hasWorked(workLogs: workLogs);
         }
+      } else {
+        dailyLogCubit.hasError();
       }
-      dailyLogCubit.hasError();
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to get daily logs: $e');
-      }
+      if (kDebugMode) print('Failed to get daily logs: $e');
       dailyLogCubit.hasError();
     }
   }

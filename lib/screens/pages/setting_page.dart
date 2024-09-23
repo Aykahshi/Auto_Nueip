@@ -20,6 +20,7 @@ class SettingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ShadThemeData theme = ShadTheme.of(context);
+    final NueipService service = locator<NueipService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -30,14 +31,8 @@ class SettingPage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () async {
-              final NueipService service = locator<NueipService>();
-              await service.checkStatus();
-            },
-            icon: const Icon(
-              Icons.restart_alt_outlined,
-              size: 30,
-            ),
+            onPressed: () async => await service.checkStatus(),
+            icon: const Icon(Icons.restart_alt_outlined, size: 30),
           ),
           const SizedBox(width: 20)
         ],

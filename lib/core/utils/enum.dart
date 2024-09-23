@@ -6,12 +6,6 @@ enum ClockAction {
   failed;
 }
 
-enum LoginStatus {
-  success,
-  failure,
-  initial,
-}
-
 enum ClickButton {
   none,
   clockInButton,
