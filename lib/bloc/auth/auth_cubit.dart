@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gl_nueip/core/models/auth_headers_model.dart';
@@ -13,6 +14,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   static const String _sessionKey = 'auth_session';
   static const String _headersKey = 'auth_headers';
+  static const String _authKey = 'hasLoggedIn';
 
   AuthCubit(this._prefs) : super(const AuthInitial()) {
     checkAuthState();
@@ -20,14 +22,15 @@ class AuthCubit extends Cubit<AuthState> {
 
   void loginSuccess(AuthHeaders headers) async {
     emit(AuthLoginSuccess(headers: headers));
-    await saveAuthHeaders(headers);
+    await _saveAuthHeaders(headers);
+    await _saveLoggedInState();
   }
 
   void loginFailed() async => emit(const AuthLoginFailed());
 
   Future<void> checkAuthState() async {
-    final AuthSession? session = await loadAuthSession();
-    final AuthHeaders? headers = await loadAuthHeaders();
+    final AuthSession? session = await _loadAuthSession();
+    final AuthHeaders? headers = await _loadAuthHeaders();
     if (session == null || headers == null) {
       emit(const AuthGetTokenFailed());
     } else {
@@ -45,7 +48,7 @@ class AuthCubit extends Cubit<AuthState> {
     await _prefs.setString(_sessionKey, sessionJson);
   }
 
-  Future<void> saveAuthHeaders(AuthHeaders newHeaders) async {
+  Future<void> _saveAuthHeaders(AuthHeaders newHeaders) async {
     final AuthHeaders updatedHeaders = AuthHeaders(
       cookie: newHeaders.cookie,
       csrfToken: newHeaders.csrfToken,
@@ -54,7 +57,7 @@ class AuthCubit extends Cubit<AuthState> {
     await _prefs.setString(_headersKey, jsonData);
   }
 
-  Future<AuthSession?> loadAuthSession() async {
+  Future<AuthSession?> _loadAuthSession() async {
     final String? jsonString = _prefs.getString(_sessionKey);
     if (jsonString == null) {
       return null;
@@ -64,7 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
     return sessionMap;
   }
 
-  Future<AuthHeaders?> loadAuthHeaders() async {
+  Future<AuthHeaders?> _loadAuthHeaders() async {
     final String? jsonString = _prefs.getString(_headersKey);
     if (jsonString == null) {
       return null;
@@ -72,5 +75,17 @@ class AuthCubit extends Cubit<AuthState> {
     final stateMap = jsonDecode(jsonString);
     final AuthHeaders headersMap = AuthHeaders.fromJson(stateMap);
     return headersMap;
+  }
+
+  bool hasLoggedIn() {
+    final bool? isEnabled = _prefs.getBool(_authKey);
+    if (isEnabled != null) {
+      return isEnabled;
+    }
+    return false;
+  }
+
+  Future<void> _saveLoggedInState() async {
+    _prefs.setBool(_authKey, true);
   }
 }

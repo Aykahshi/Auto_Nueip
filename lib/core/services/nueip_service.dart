@@ -90,18 +90,18 @@ class NueipService {
     }
   }
 
-  Future<void> _checkAuth() async {
-    bool needsRefresh = false;
-    final List<Cookie> cookies =
-        await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
-    for (final Cookie cookie in cookies) {
-      if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
-        needsRefresh = true;
-        break;
-      }
-    }
-    if (needsRefresh) await _login();
-  }
+  // Future<void> _checkAuth() async {
+  //   bool needsRefresh = false;
+  //   final List<Cookie> cookies =
+  //       await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
+  //   for (final Cookie cookie in cookies) {
+  //     if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
+  //       needsRefresh = true;
+  //       break;
+  //     }
+  //   }
+  //   if (needsRefresh) await _login();
+  // }
 
   Future<String> _getCookieHeader() async {
     final List<Cookie> cookies =
@@ -140,12 +140,41 @@ class NueipService {
     return response.data;
   }
 
-  Future<void> _checkTokenExpired() async {
-    if (_authCubit.state.session == null || _authCubit.state.headers == null) {
-      await _authCubit.checkAuthState();
+  Future<void> _checkAuth() async {
+    bool needsRefresh = false;
+
+    // 新增第一次登入的判斷
+    needsRefresh = !_authCubit.hasLoggedIn();
+
+    // 檢查 cookie 是否過期
+    final List<Cookie> cookies =
+        await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
+    for (final Cookie cookie in cookies) {
+      if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
+        needsRefresh = true;
+        break;
+      }
     }
-    final bool needsRefresh = _authCubit.state.session!.isTokenExpired();
-    if (needsRefresh) await _getOauthToken();
+
+    // 檢查 token 是否過期
+    if (!needsRefresh) {
+      if (_authCubit.state.session == null ||
+          _authCubit.state.headers == null) {
+        await _authCubit.checkAuthState();
+      }
+      needsRefresh = _authCubit.state.session!.isTokenExpired();
+    }
+
+    if (needsRefresh) {
+      if (_authCubit.state.session == null ||
+          _authCubit.state.headers == null) {
+        await _login();
+      } else {
+        await _getOauthToken();
+      }
+    }
+    // 重新加載數據給 Cubit
+    await _authCubit.checkAuthState();
   }
 
   Future<void> _getOauthToken() async {
@@ -193,7 +222,6 @@ class NueipService {
 
   Future<void> checkStatus() async {
     await _checkAuth();
-    await _checkTokenExpired();
     if (kDebugMode) print('Checking Status Completed');
     final ClockedTime? clockedTime = await _getClockTime();
     if (kDebugMode) print('Get Clock Time Completed: $clockedTime');
