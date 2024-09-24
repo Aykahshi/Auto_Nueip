@@ -7,6 +7,9 @@ class CurlConfig {
   static const String TOKEN_URL = '$BASE_URL/oauth2/token/api';
   static const String RECORD_URL = '$BASE_URL/portal/Portal_punch_clock/ajax';
   static const String DAILY_LOG_URL = '$BASE_URL/attendance_record/ajax';
+  static const String HOLIDAY_URL =
+      'https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/';
+
   static const Map<String, String> headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent':

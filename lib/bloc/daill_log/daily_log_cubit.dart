@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'daily_log_state.dart';
 
@@ -19,6 +19,10 @@ class DailyLogCubit extends Cubit<DailyLogState> {
 
   void hasWorked({required List<WorkLog> workLogs}) {
     emit(DailyLogWorked(workLogs: workLogs));
+  }
+
+  void isHoliday() {
+    emit(const DailyLogHoliday());
   }
 
   void hasTimeOff({required String timeOffType}) {

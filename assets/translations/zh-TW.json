@@ -2,6 +2,7 @@
   "set_info_first": "請先設定您的使用者資料！",
   "welcome": "歡迎 {name}!",
   "time_now": "現在時間: {time}",
+  "holiday": "今天不用上班！",
   "change_action": {
     "title": "修改使用者資料",
     "changed": "修改成功！請點擊右上角刷新！"

@@ -36,3 +36,10 @@ final class DailyLogWorked extends DailyLogState {
   @override
   List<Object> get props => [workLogs];
 }
+
+final class DailyLogHoliday extends DailyLogState {
+  const DailyLogHoliday();
+
+  @override
+  List<Object> get props => [];
+}

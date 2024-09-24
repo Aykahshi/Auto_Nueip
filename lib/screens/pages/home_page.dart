@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:gl_nueip/bloc/timer/timer_cubit.dart';
 import 'package:gl_nueip/bloc/user/user_cubit.dart';
+import 'package:gl_nueip/screens/dialogs/user_info_dialog.dart';
 import 'package:gl_nueip/screens/widgets/calendar_widget.dart';
 import 'package:gl_nueip/screens/widgets/clock_button_widget.dart';
 import 'package:gl_nueip/screens/widgets/scaffold_with_action_widget.dart';
@@ -27,20 +28,7 @@ class HomePage extends StatelessWidget {
                 ShadCard(
                   width: MediaQuery.of(context).size.width * 0.9,
                   backgroundColor: Colors.grey[800]!.withOpacity(0.15),
-                  footer: userCubit.isNotDefault()
-                      ? const ClockButton()
-                      : Align(
-                          child: ShadCard(
-                            backgroundColor: Colors.red.withOpacity(0.7),
-                            child: FittedBox(
-                              child: Text(
-                                'set_info_first'.tr(),
-                                style: theme.textTheme.p
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ),
+                  // ignore: sort_child_properties_last
                   child: Center(
                     child: Column(
                       children: [
@@ -52,6 +40,28 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  footer: userCubit.isNotDefault()
+                      ? const ClockButton()
+                      : Align(
+                          child: InkWell(
+                            onTap: () {
+                              showShadDialog(
+                                context: context,
+                                builder: (_) => const UserInfoDialog(),
+                              );
+                            },
+                            child: ShadCard(
+                              backgroundColor: Colors.red.withOpacity(0.7),
+                              child: FittedBox(
+                                child: Text(
+                                  'set_info_first'.tr(),
+                                  style: theme.textTheme.p
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
                 const Gap(10),
                 ShadCard(

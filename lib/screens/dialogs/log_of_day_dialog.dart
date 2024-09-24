@@ -17,7 +17,7 @@ class DayLog extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(60),
       child: ShadDialog(
-        title: Text('log.title'.tr(), style: const TextStyle(fontSize: 24)),
+        title: const Text('log.title', style: TextStyle(fontSize: 24)).tr(),
         child: DefaultTextStyle(
           style: TextStyle(
             fontSize: 16,
@@ -44,8 +44,9 @@ class DayLog extends StatelessWidget {
                               color: Colors.lightBlueAccent),
                         ),
                         const Gap(20),
-                        Text('log.loading'.tr(),
-                            style: const TextStyle(fontSize: 18)),
+                        const Text('log.loading',
+                                style: TextStyle(fontSize: 18))
+                            .tr(),
                       ],
                     );
                   }
@@ -78,8 +79,21 @@ class DayLogContent extends StatelessWidget {
                   color: Colors.white70,
                 ),
                 const Gap(20),
-                Text('time_off.title'
-                    .tr(namedArgs: {'type': state.timeOffType})),
+                const Text('time_off.title')
+                    .tr(namedArgs: {'type': state.timeOffType}),
+              ],
+            );
+          case DailyLogHoliday():
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.code_off_outlined,
+                  size: 80,
+                  color: Colors.white70,
+                ),
+                const Gap(20),
+                const Text('holiday').tr(),
               ],
             );
           case DailyLogWorked():
@@ -95,13 +109,17 @@ class DayLogContent extends StatelessWidget {
               horizontalMargin: 14,
               columns: [
                 DataColumn(
-                    label: Expanded(
-                        child: Text('log.time'.tr(),
-                            textAlign: TextAlign.center))),
+                  label: Expanded(
+                    child: const Text('log.time', textAlign: TextAlign.center)
+                        .tr(),
+                  ),
+                ),
                 DataColumn(
-                    label: Expanded(
-                        child: Text('log.status'.tr(),
-                            textAlign: TextAlign.center)))
+                  label: Expanded(
+                    child: const Text('log.status', textAlign: TextAlign.center)
+                        .tr(),
+                  ),
+                )
               ],
               rows: state.workLogs.map((w) {
                 return DataRow(cells: [
@@ -120,7 +138,7 @@ class DayLogContent extends StatelessWidget {
                   color: Colors.white70,
                 ),
                 const Gap(20),
-                Text('log.no_logs'.tr()),
+                const Text('log.no_logs').tr(),
               ],
             );
           case DailyLogError():
@@ -133,7 +151,7 @@ class DayLogContent extends StatelessWidget {
                   color: Colors.white70,
                 ),
                 const Gap(20),
-                Text('log.error'.tr()),
+                const Text('log.error').tr(),
               ],
             );
           default:
@@ -148,7 +166,7 @@ class DayLogContent extends StatelessWidget {
                   ),
                 ),
                 const Gap(20),
-                Text('log.loading'.tr(), style: const TextStyle(fontSize: 18)),
+                const Text('log.loading', style: TextStyle(fontSize: 18)).tr(),
               ],
             );
         }

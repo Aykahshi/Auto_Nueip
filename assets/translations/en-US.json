@@ -2,6 +2,7 @@
   "set_info_first": "Please set your info first!",
   "welcome": "Welcome {name}!",
   "time_now": "Now: {time}",
+  "holiday": "It's holiday today!",
   "change_action": {
     "title": "Change User Info",
     "changed": "Successfully! Refresh by click the upper right button."

@@ -31,7 +31,7 @@ class SettingPage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () async => await service.checkStatus(),
+            onPressed: () => service.checkStatus(),
             icon: const Icon(Icons.restart_alt_outlined, size: 30),
           ),
           const SizedBox(width: 20)

@@ -10,6 +10,7 @@ import 'package:gl_nueip/core/models/auth_session_model.dart';
 import 'package:gl_nueip/core/models/location_model.dart';
 import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/utils/utils.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class NueipService {
   late final CookieJar _cookieJar;
@@ -23,12 +24,12 @@ class NueipService {
     _cookieJar = CookieJar();
     _dio = Dio(BaseOptions(headers: CurlConfig.headers, followRedirects: false))
       ..interceptors.add(CookieManager(_cookieJar))
-      // ..interceptors.add(PrettyDioLogger(
-      //   requestHeader: true,
-      //   requestBody: true,
-      //   responseBody: true,
-      //   responseHeader: false,
-      // ))
+      ..interceptors.add(PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+      ))
       ..transformer = CustomTransformer()
       ..options.validateStatus = (statusCode) => statusCode! < 400;
   }
@@ -99,7 +100,6 @@ class NueipService {
         break;
       }
     }
-    if (_authCubit.state.headers?.csrfToken == null) needsRefresh = true;
     if (needsRefresh) await _login();
   }
 
@@ -202,8 +202,8 @@ class NueipService {
 
   Future<void> getDailyLogs(String date) async {
     final String? userNum = _userCubit.state.user.number;
-
     final DailyLogCubit dailyLogCubit = locator<DailyLogCubit>();
+
     final formData = {
       'action': 'attendance',
       'loadInBatch': '1',
@@ -221,32 +221,40 @@ class NueipService {
               'Search_42_date_start=$date; Search_42_date_end=$date; ${_authCubit.state.headers!.cookie}'
         }),
       );
-      if (userNum != null) {
-        final logData = response.data['data'][date][userNum];
-        if (logData['timeoff'] == null && logData['punch'] == null) {
-          dailyLogCubit.hasNoLogs();
-        }
+      if (userNum case String userNumber) {
+        final logData = response.data['data'][date][userNumber];
 
-        if (logData['timeoff'] != null) {
-          final String timeOffName = logData['timeoff'].first['rule_name'];
-          dailyLogCubit.hasTimeOff(timeOffType: timeOffName);
-        } else if (logData['punch'] != null) {
-          final clockLogs = logData['punch'];
-          final List<WorkLog> workLogs = [];
+        switch (logData) {
+          case {'timeoff': var timeoff, 'punch': var punch}
+              when timeoff == null && punch == null:
+            dailyLogCubit.hasNoLogs();
 
-          if (clockLogs['onPunch'] != null) {
-            workLogs.add((
-              time: clockLogs['onPunch'].first['time'],
-              status: 'status.clock_in'.tr()
-            ));
-          }
-          if (clockLogs['offPunch'] != null) {
-            workLogs.add((
-              time: clockLogs['offPunch'].first['time'],
-              status: 'status.clock_out'.tr()
-            ));
-          }
-          dailyLogCubit.hasWorked(workLogs: workLogs);
+          case {'dateInfo': var dateInfo}
+              when dateInfo["date_off"] as bool == true:
+            dailyLogCubit.isHoliday();
+
+          case {'timeoff': var timeoff} when timeoff != null:
+            final String timeOffName = timeoff.first['rule_name'];
+            dailyLogCubit.hasTimeOff(timeOffType: timeOffName);
+
+          case {'punch': var punch} when punch != null:
+            final List<WorkLog> workLogs = [];
+            if (punch case {'onPunch': var onPunch}) {
+              workLogs.add((
+                time: onPunch.first['time'],
+                status: 'status.clock_in'.tr()
+              ));
+            }
+            if (punch case {'offPunch': var offPunch}) {
+              workLogs.add((
+                time: offPunch.first['time'],
+                status: 'status.clock_out'.tr()
+              ));
+            }
+            dailyLogCubit.hasWorked(workLogs: workLogs);
+
+          default:
+            dailyLogCubit.hasError();
         }
       } else {
         dailyLogCubit.hasError();
