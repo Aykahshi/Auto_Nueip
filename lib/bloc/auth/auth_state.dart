@@ -14,8 +14,8 @@ final class AuthInitial extends AuthState {
   List<Object> get props => [];
 }
 
-final class AuthHasNoToken extends AuthState {
-  const AuthHasNoToken() : super();
+final class AuthGetTokenFailed extends AuthState {
+  const AuthGetTokenFailed() : super();
 
   @override
   List<Object> get props => [];
@@ -26,6 +26,14 @@ final class AuthLoginFailed extends AuthState {
 
   @override
   List<Object> get props => [];
+}
+
+final class AuthLoginSuccess extends AuthState {
+  const AuthLoginSuccess({required AuthHeaders headers})
+      : super(headers: headers);
+
+  @override
+  List<Object?> get props => [headers];
 }
 
 final class AuthHasToken extends AuthState {

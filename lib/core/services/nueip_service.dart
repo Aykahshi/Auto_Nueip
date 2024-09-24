@@ -1,16 +1,15 @@
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
 import 'package:gl_nueip/core/models/auth_headers_model.dart';
 import 'package:gl_nueip/core/models/auth_session_model.dart';
-import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/models/location_model.dart';
+import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/utils/utils.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class NueipService {
   late final CookieJar _cookieJar;
@@ -80,9 +79,10 @@ class NueipService {
         final String cookieHeader = await _getCookieHeader();
         final String csrfToken =
             await _getCrsfToken(cookieHeader: cookieHeader);
-        _authCubit.loginSuccess(
-          AuthHeaders(cookie: cookieHeader, csrfToken: csrfToken),
-        );
+        final AuthHeaders newHeaders =
+            AuthHeaders(cookie: cookieHeader, csrfToken: csrfToken);
+        _authCubit.loginSuccess(newHeaders);
+        await _getOauthToken();
       }
     } catch (e) {
       _authCubit.loginFailed();
@@ -141,7 +141,9 @@ class NueipService {
   }
 
   Future<void> _checkTokenExpired() async {
-    if (_authCubit.state.session == null) await _authCubit.checkAuthState();
+    if (_authCubit.state.session == null || _authCubit.state.headers == null) {
+      await _authCubit.checkAuthState();
+    }
     final bool needsRefresh = _authCubit.state.session!.isTokenExpired();
     if (needsRefresh) await _getOauthToken();
   }
