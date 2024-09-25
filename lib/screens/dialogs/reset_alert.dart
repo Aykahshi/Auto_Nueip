@@ -15,20 +15,20 @@ class ResetAlert extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.all(30),
           child: ShadDialog.alert(
-            title: Text('reset_action.title'.tr()),
+            title: const Text('reset_action.title').tr(),
             description: Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text('reset_action.alert'.tr()),
+              child: const Text('reset_action.alert').tr(),
             ),
             actions: [
               ShadButton.outline(
                 width: 200,
-                child: Text('button.cancel'.tr()),
+                child: const Text('button.cancel').tr(),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               ShadButton.destructive(
                 width: 200,
-                child: Text('button.reset'.tr()),
+                child: const Text('button.reset').tr(),
                 onPressed: () {
                   context.read<UserCubit>().reset();
                   showToast(

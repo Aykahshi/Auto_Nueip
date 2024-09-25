@@ -15,10 +15,7 @@ class UserInfoDialog extends StatelessWidget {
       child: ShadDialog(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         gap: 10,
-        title: Text(
-          'change_action.title'.tr(),
-          style: theme.textTheme.h3,
-        ),
+        title: Text('change_action.title', style: theme.textTheme.h3).tr(),
         alignment: Alignment.center,
         titleTextAlign: TextAlign.center,
         child: const InfoForm(),

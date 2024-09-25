@@ -32,8 +32,8 @@ class HomePage extends StatelessWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        Text('welcome'.tr(namedArgs: {'name': info.user.name}),
-                            style: theme.textTheme.h3),
+                        Text('welcome', style: theme.textTheme.h3)
+                            .tr(namedArgs: {'name': info.user.name}),
                         const Gap(20),
                         const TimeClock(),
                         const Gap(20),
@@ -54,10 +54,10 @@ class HomePage extends StatelessWidget {
                               backgroundColor: Colors.red.withOpacity(0.7),
                               child: FittedBox(
                                 child: Text(
-                                  'set_info_first'.tr(),
+                                  'set_info_first',
                                   style: theme.textTheme.p
                                       .copyWith(fontWeight: FontWeight.bold),
-                                ),
+                                ).tr(),
                               ),
                             ),
                           ),
@@ -89,12 +89,12 @@ class TimeClock extends StatelessWidget {
       child: BlocBuilder<TimeCubit, DateTime>(
         builder: (_, currentTime) {
           return FittedBox(
-            child: Text(
-              'time_now'.tr(namedArgs: {
-                'time': DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime)
-              }),
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
+            child: const Text(
+              'time_now',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ).tr(namedArgs: {
+              'time': DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime)
+            }),
           );
         },
       ),
