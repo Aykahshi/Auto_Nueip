@@ -25,9 +25,9 @@ class SettingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'settings.title'.tr(),
+          'settings.title',
           style: theme.textTheme.h3.copyWith(fontWeight: FontWeight.w200),
-        ),
+        ).tr(),
         centerTitle: true,
         actions: [
           IconButton(
@@ -77,19 +77,18 @@ class SettingPage extends StatelessWidget {
                               BlocBuilder<UserCubit, UserState>(
                                 builder: (_, info) {
                                   return Text(
-                                    'welcome'.tr(
-                                        namedArgs: {'name': info.user.name}),
+                                    'welcome',
                                     style: theme.textTheme.h3,
-                                  );
+                                  ).tr(namedArgs: {'name': info.user.name});
                                 },
                               ),
                               Text(
-                                'settings.click_to_check'.tr(),
+                                'settings.click_to_check',
                                 style: theme.textTheme.p.copyWith(
                                   fontSize: 12,
                                   color: Colors.grey[600],
                                 ),
-                              ),
+                              ).tr(),
                             ],
                           )
                         ],

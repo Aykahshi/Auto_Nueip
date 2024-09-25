@@ -43,12 +43,12 @@ class InfoForm extends StatelessWidget {
           children: [
             ShadButton.secondary(
               width: 100,
-              child: Text('button.clear'.tr()),
+              child: const Text('button.clear').tr(),
               onPressed: () => formKey.currentState!.reset(),
             ),
             ShadButton(
               width: 100,
-              child: Text('button.save'.tr()),
+              child: const Text('button.save').tr(),
               onPressed: () => savaUserInfo(),
             ),
           ],
@@ -90,26 +90,26 @@ class FormFields extends StatelessWidget {
     return [
       ShadInputFormField(
         id: 'name',
-        label: Text('form.name'.tr()),
-        placeholder: Text('placeholder.name'.tr()),
+        label: const Text('form.name').tr(),
+        placeholder: const Text('placeholder.name').tr(),
       ),
       ShadInputFormField(
         id: 'company',
-        label: Text('form.company'.tr()),
-        placeholder: Text('placeholder.company'.tr()),
+        label: const Text('form.company').tr(),
+        placeholder: const Text('placeholder.company').tr(),
       ),
       ShadInputFormField(
         id: 'id',
-        label: Text('form.id'.tr()),
-        placeholder: Text('placeholder.id'.tr()),
+        label: const Text('form.id').tr(),
+        placeholder: const Text('placeholder.id').tr(),
       ),
       ValueListenableBuilder(
         valueListenable: obscure,
         builder: (BuildContext context, value, Widget? child) {
           return ShadInputFormField(
             id: 'password',
-            label: Text('form.password'.tr()),
-            placeholder: Text('placeholder.password'.tr()),
+            label: const Text('form.password').tr(),
+            placeholder: const Text('placeholder.password').tr(),
             obscureText: obscure.value,
             suffix: ShadButton.ghost(
               width: 20,

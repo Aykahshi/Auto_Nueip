@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gl_nueip/bloc/lang/lang_cubit.dart';
+import 'package:gl_nueip/core/models/holiday_model.dart';
 import 'package:gl_nueip/core/services/holiday_service.dart';
 import 'package:gl_nueip/core/utils/enum.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
@@ -18,14 +19,18 @@ class WorklogCalendar extends StatefulWidget {
 class _WorklogCalendarState extends State<WorklogCalendar> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  List<Holiday> _holidayList = [];
 
   final HolidayService _holidayService = locator<HolidayService>();
 
   @override
   void initState() {
     super.initState();
-    _holidayService.getHolidays();
-    setState(() {});
+    _holidayService.getHolidays().then((holidays) {
+      setState(() {
+        _holidayList = holidays;
+      });
+    });
   }
 
   @override
@@ -42,7 +47,7 @@ class _WorklogCalendarState extends State<WorklogCalendar> {
               formatButtonVisible: false, titleCentered: true),
           calendarStyle: CalendarStyle(
             defaultTextStyle: const TextStyle(color: Colors.white),
-            weekendTextStyle: const TextStyle(color: Colors.redAccent),
+            holidayTextStyle: const TextStyle(color: Colors.redAccent),
             todayDecoration: BoxDecoration(
               color: Colors.blueAccent.withOpacity(0.2),
               shape: BoxShape.circle,
@@ -53,8 +58,9 @@ class _WorklogCalendarState extends State<WorklogCalendar> {
             ),
           ),
           calendarBuilders: CalendarBuilders(
-            markerBuilder: (context, day, events) {
+            holidayBuilder: (_, day, __) {
               // TODO: Add holiday logic
+
               return null;
             },
           ),

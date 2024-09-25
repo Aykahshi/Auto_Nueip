@@ -1,37 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
 import 'package:gl_nueip/core/models/holiday_model.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class HolidayService {
-  late final Dio _dio;
+  final Dio _dio = Dio();
 
-  HolidayService() {
-    _dio = Dio()
-      ..interceptors.add(PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-      ));
-  }
-
-  // TODO: Needs to refactor
-  Future<Holiday> getHolidays() async {
-    final year = DateTime.now().year;
+  Future<List<Holiday>> getHolidays() async {
+    final year = DateTime.now().year.toString();
     final Response response = await _dio.get(
-      "${CurlConfig.HOLIDAY_URL}/${year.toString()}.json",
+      "${CurlConfig.HOLIDAY_URL}/$year.json",
     );
 
-    final Holiday holiday = Holiday.fromJson(response.data);
-    return holiday;
-  }
+    final List<dynamic> fullData = response.data;
+    final List<Holiday> holidays = fullData
+        .map((e) => Holiday.fromJson(e))
+        .where((element) => element.isHoliday)
+        .toList();
 
-  DateTime parseDateTime(String dateString) {
-    int year = int.parse(dateString.substring(0, 4));
-    int month = int.parse(dateString.substring(4, 6));
-    int day = int.parse(dateString.substring(6, 8));
-    DateTime date = DateTime(year, month, day);
-    return date;
+    print('Holidays: ${holidays.first.isHoliday}');
+    return holidays;
   }
 }

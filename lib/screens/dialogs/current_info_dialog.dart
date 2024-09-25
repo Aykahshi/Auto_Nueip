@@ -17,21 +17,19 @@ class CurrentInfoDialog extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.all(30),
           child: ShadDialog(
-            title: Text(
-              'current_info.title'.tr(),
-              style: theme.textTheme.h3,
-            ),
+            title: Text('current_info.title', style: theme.textTheme.h3).tr(),
             alignment: Alignment.center,
             titleTextAlign: TextAlign.center,
             child: Column(
               children: [
-                Text('current_info.company'
-                    .tr(namedArgs: {'company': state.user.company})),
+                const Text('current_info.company')
+                    .tr(namedArgs: {'company': state.user.company}),
                 const Gap(5),
-                Text('current_info.id'.tr(namedArgs: {'id': state.user.id})),
+                const Text('current_info.id')
+                    .tr(namedArgs: {'id': state.user.id}),
                 const Gap(5),
-                Text('current_info.password'
-                    .tr(namedArgs: {'password': state.user.password})),
+                const Text('current_info.password')
+                    .tr(namedArgs: {'password': state.user.password}),
               ],
             ),
           ),
