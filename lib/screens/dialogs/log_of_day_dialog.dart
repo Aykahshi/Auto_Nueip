@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:gl_nueip/bloc/daill_log/daily_log_cubit.dart';
+import 'package:gl_nueip/bloc/daily_log/daily_log_cubit.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';

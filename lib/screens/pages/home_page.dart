@@ -2,9 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:gl_nueip/bloc/timer/timer_cubit.dart';
-import 'package:gl_nueip/bloc/user/user_cubit.dart';
+import 'package:gl_nueip/bloc/cubit.dart';
+import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/screens/dialogs/user_info_dialog.dart';
+import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:gl_nueip/screens/widgets/calendar_widget.dart';
 import 'package:gl_nueip/screens/widgets/clock_button_widget.dart';
 import 'package:gl_nueip/screens/widgets/scaffold_with_action_widget.dart';
@@ -16,7 +17,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ShadThemeData theme = ShadTheme.of(context);
-    final UserCubit userCubit = context.read<UserCubit>();
+    final AuthCubit authCubit = context.read<AuthCubit>();
 
     return ScaffoldWithAction(
       body: BlocBuilder<UserCubit, UserState>(
@@ -40,7 +41,7 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  footer: userCubit.isNotDefault()
+                  footer: authCubit.isLoggedIn
                       ? const ClockButton()
                       : Align(
                           child: InkWell(
@@ -85,16 +86,18 @@ class TimeClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TimeCubit(),
+      create: (_) => locator<TimeCubit>(),
       child: BlocBuilder<TimeCubit, DateTime>(
         builder: (_, currentTime) {
           return FittedBox(
             child: const Text(
               'time_now',
               style: TextStyle(fontSize: 18, color: Colors.grey),
-            ).tr(namedArgs: {
-              'time': DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime)
-            }),
+            ).tr(
+              namedArgs: {
+                'time': DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime)
+              },
+            ),
           );
         },
       ),

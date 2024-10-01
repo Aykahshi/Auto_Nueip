@@ -22,7 +22,7 @@ void main() async {
   await NotificationService.init();
   await locator<NotificationService>().checkNotificationsEnabled();
   await locator<NotificationService>().checkClockedOrNot();
-  if (locator<UserCubit>().isNotDefault()) {
+  if (locator<AuthCubit>().isLoggedIn) {
     await locator<NueipService>().checkStatus();
   }
 

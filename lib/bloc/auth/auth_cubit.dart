@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gl_nueip/core/models/auth_headers_model.dart';
@@ -23,10 +22,12 @@ class AuthCubit extends Cubit<AuthState> {
   void loginSuccess(AuthHeaders headers) async {
     emit(AuthLoginSuccess(headers: headers));
     await _saveAuthHeaders(headers);
-    await _saveLoggedInState();
+    await setLoggedInState(true);
   }
 
   void loginFailed() async => emit(const AuthLoginFailed());
+
+  bool get isLoggedIn => hasLoggedIn();
 
   Future<void> checkAuthState() async {
     final AuthSession? session = await _loadAuthSession();
@@ -85,7 +86,7 @@ class AuthCubit extends Cubit<AuthState> {
     return false;
   }
 
-  Future<void> _saveLoggedInState() async {
-    _prefs.setBool(_authKey, true);
+  Future<void> setLoggedInState(bool isLoggedIn) async {
+    _prefs.setBool(_authKey, isLoggedIn);
   }
 }

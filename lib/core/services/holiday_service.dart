@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gl_nueip/core/configs/curl_config.dart';
 import 'package:gl_nueip/core/models/holiday_model.dart';
 
@@ -17,7 +18,8 @@ class HolidayService {
         .where((element) => element.isHoliday)
         .toList();
 
-    print('Holidays: ${holidays.first.isHoliday}');
+    if (kDebugMode) print('Holidays: ${holidays.first.isHoliday}');
+
     return holidays;
   }
 }

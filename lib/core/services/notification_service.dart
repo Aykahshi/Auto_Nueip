@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gl_nueip/bloc/clock/clock_cubit.dart';
 import 'package:gl_nueip/bloc/lang/lang_cubit.dart';
 import 'package:gl_nueip/bloc/remind/remind_cubit.dart';
@@ -9,57 +9,88 @@ import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/enum.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  static Future<void> init() async {
-    await AwesomeNotifications().initialize(
-      'resource://drawable/res_app_icon',
-      [
-        NotificationChannel(
-          channelKey: 'clock_in_out_channel',
-          channelName: 'Clock In/Out Notifications',
-          channelDescription: 'Notifications for clock in and out reminders',
-          channelShowBadge: true,
-          playSound: true,
-          onlyAlertOnce: true,
-          enableVibration: true,
-          importance: NotificationImportance.High,
-          defaultColor: const Color(0xFF333333),
-          ledColor: Colors.white,
-        )
-      ],
-    );
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: onActionReceivedMethod,
+  static Future<void> init() async {
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Taipei'));
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+      onDidReceiveLocalNotification:
+          (int id, String? title, String? body, String? payload) async {},
     );
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+    );
+  }
+
+  static void onDidReceiveNotificationResponse(
+      NotificationResponse notificationResponse) async {
+    final String? payload = notificationResponse.payload;
+    if (notificationResponse.payload != null) {
+      debugPrint('notification payload: $payload');
+    }
+    final NueipService service = locator<NueipService>();
+    if (payload == 'CLOCK_IN') {
+      service.clockIn();
+    } else if (payload == 'CLOCK_OUT') {
+      service.clockOut();
+    }
   }
 
   Future<bool> checkNotificationPermission() async {
-    bool isNotificationAllowed =
-        await AwesomeNotifications().isNotificationAllowed();
-    bool isScheduleExactAlarmAllowed = await requestAlarmPermission();
-
-    if (!isNotificationAllowed) {
-      isNotificationAllowed =
-          await AwesomeNotifications().requestPermissionToSendNotifications();
+    if (Platform.isIOS) {
+      return await _requestIOSPermissions();
+    } else if (Platform.isAndroid) {
+      return await _requestAndroidPermissions();
     }
-
-    return isNotificationAllowed && isScheduleExactAlarmAllowed;
+    return false;
   }
 
-  Future<bool> requestAlarmPermission() async {
-    bool isScheduleExactAlarmAllowed =
-        await Permission.scheduleExactAlarm.isGranted;
+  Future<bool> _requestIOSPermissions() async {
+    return await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>()
+            ?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            ) ??
+        false;
+  }
 
-    if (Platform.isAndroid) {
-      if (!isScheduleExactAlarmAllowed) {
-        isScheduleExactAlarmAllowed =
-            await Permission.scheduleExactAlarm.request().isGranted;
-      }
-      return isScheduleExactAlarmAllowed;
-    }
-    return true;
+  Future<bool> _requestAndroidPermissions() async {
+    final notificationStatus = await Permission.notification.request();
+    final bool notificationPermissionGranted = notificationStatus.isGranted;
+
+    final alarmStatus = await Permission.scheduleExactAlarm.request();
+    final bool exactAlarmPermissionGranted = alarmStatus.isGranted;
+
+    final bool? exactAlarmsGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestExactAlarmsPermission();
+
+    return notificationPermissionGranted &&
+        exactAlarmPermissionGranted &&
+        (exactAlarmsGranted ?? false);
   }
 
   Future<void> checkNotificationsEnabled() async {
@@ -96,9 +127,9 @@ class NotificationService {
       final bool clockOut = locator<ClockCubit>().state.isClockedOut;
 
       if (clockIn) {
-        await AwesomeNotifications().cancel(todayWeekday);
+        await flutterLocalNotificationsPlugin.cancel(todayWeekday);
       } else if (clockOut) {
-        await AwesomeNotifications().cancel(todayWeekday + 10);
+        await flutterLocalNotificationsPlugin.cancel(todayWeekday + 10);
       }
     }
   }
@@ -109,64 +140,60 @@ class NotificationService {
     required int id,
     required int hour,
   }) async {
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: id,
-        channelKey: 'clock_in_out_channel',
-        title: locator<LangCubit>().state.language == Language.enUS
-            ? method == 'in'
-                ? 'Clock In Reminder'
-                : 'Clock Out Reminder'
-            : method == 'in'
-                ? '上班打卡提醒'
-                : '下班打卡提醒',
-        body: locator<LangCubit>().state.language == Language.enUS
-            ? method == 'in'
-                ? 'Remember to clock in today!'
-                : 'Remember to clock out today!'
-            : method == 'in'
-                ? '今天上班記得打卡！'
-                : '今天下班記得打卡！',
-        notificationLayout: NotificationLayout.Default,
-        autoDismissible: true,
-        wakeUpScreen: true,
-      ),
-      schedule: NotificationCalendar(
-        weekday: weekday,
-        hour: hour,
-        minute: 50,
-        second: 0,
-        millisecond: 0,
-        timeZone: 'Asia/Taipei',
-        repeats: true,
-      ),
-      actionButtons: [
-        NotificationActionButton(
-          key: 'CLOCK_${method.toUpperCase()}',
-          label: locator<LangCubit>().state.language == Language.enUS
-              ? method == 'in'
-                  ? 'Clock In'
-                  : 'Clock Out'
-              : method == 'in'
-                  ? '上班打卡'
-                  : '下班打卡',
-        ),
-      ],
+    final language = locator<LangCubit>().state.language;
+    final title = language == Language.enUS
+        ? method == 'in'
+            ? 'Clock In Reminder'
+            : 'Clock Out Reminder'
+        : method == 'in'
+            ? '上班打卡提醒'
+            : '下班打卡提醒';
+    final body = language == Language.enUS
+        ? method == 'in'
+            ? 'Remember to clock in today!'
+            : 'Remember to clock out today!'
+        : method == 'in'
+            ? '今天上班記得打卡！'
+            : '今天下班記得打卡！';
+
+    const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'clock_in_out_channel',
+      'Clock In/Out Notifications',
+      channelDescription: 'Notifications for clock in and out reminders',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+    const platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      _nextInstanceOfWeekday(weekday, hour),
+      platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      payload: 'CLOCK_${method.toUpperCase()}',
     );
   }
 
-  @pragma("vm:entry-point")
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
-    final NueipService service = locator<NueipService>();
-    if (receivedAction.buttonKeyPressed == 'CLOCK_IN') {
-      service.clockIn();
-    } else if (receivedAction.buttonKeyPressed == 'CLOCK_OUT') {
-      service.clockOut();
+  tz.TZDateTime _nextInstanceOfWeekday(int weekday, int hour) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, 50);
+    while (scheduledDate.weekday != weekday || scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
+    return scheduledDate;
   }
 
   static Future<void> _cancelAllNotifications() async {
-    await AwesomeNotifications().cancelAll();
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 }

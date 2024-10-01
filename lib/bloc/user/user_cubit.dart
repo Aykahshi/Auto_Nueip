@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:gl_nueip/core/models/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gl_nueip/bloc/cubit.dart';
+import 'package:gl_nueip/core/models/user_model.dart';
+import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'user_state.dart';
@@ -31,7 +33,6 @@ class UserCubit extends Cubit<UserState> {
         ),
       ),
     );
-
     _saveState();
   }
 
@@ -42,12 +43,8 @@ class UserCubit extends Cubit<UserState> {
 
   void reset() async {
     emit(const UserState(user: User()));
+    locator<AuthCubit>().setLoggedInState(false);
     _saveState();
-  }
-
-  bool isNotDefault() {
-    const User defaultUser = User();
-    return state.user != defaultUser;
   }
 
   void _loadState() async {

@@ -10,7 +10,7 @@ import 'package:gl_nueip/core/models/auth_session_model.dart';
 import 'package:gl_nueip/core/models/location_model.dart';
 import 'package:gl_nueip/core/models/log_response_model.dart';
 import 'package:gl_nueip/core/utils/utils.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+// import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class NueipService {
   late final CookieJar _cookieJar;
@@ -24,12 +24,12 @@ class NueipService {
     _cookieJar = CookieJar();
     _dio = Dio(BaseOptions(headers: CurlConfig.headers, followRedirects: false))
       ..interceptors.add(CookieManager(_cookieJar))
-      ..interceptors.add(PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-      ))
+      // ..interceptors.add(PrettyDioLogger(
+      //   requestHeader: true,
+      //   requestBody: true,
+      //   responseBody: true,
+      //   responseHeader: false,
+      // ))
       ..transformer = CustomTransformer()
       ..options.validateStatus = (statusCode) => statusCode! < 400;
   }
@@ -90,19 +90,6 @@ class NueipService {
     }
   }
 
-  // Future<void> _checkAuth() async {
-  //   bool needsRefresh = false;
-  //   final List<Cookie> cookies =
-  //       await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
-  //   for (final Cookie cookie in cookies) {
-  //     if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
-  //       needsRefresh = true;
-  //       break;
-  //     }
-  //   }
-  //   if (needsRefresh) await _login();
-  // }
-
   Future<String> _getCookieHeader() async {
     final List<Cookie> cookies =
         await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
@@ -141,22 +128,11 @@ class NueipService {
   }
 
   Future<void> _checkAuth() async {
+    await _login();
     bool needsRefresh = false;
 
-    // 新增第一次登入的判斷
     needsRefresh = !_authCubit.hasLoggedIn();
 
-    // 檢查 cookie 是否過期
-    final List<Cookie> cookies =
-        await _cookieJar.loadForRequest(Uri.parse(CurlConfig.LOGIN_URL));
-    for (final Cookie cookie in cookies) {
-      if (cookie.expires != null && cookie.expires!.isAfter(DateTime.now())) {
-        needsRefresh = true;
-        break;
-      }
-    }
-
-    // 檢查 token 是否過期
     if (!needsRefresh) {
       if (_authCubit.state.session == null ||
           _authCubit.state.headers == null) {
@@ -165,15 +141,7 @@ class NueipService {
       needsRefresh = _authCubit.state.session!.isTokenExpired();
     }
 
-    if (needsRefresh) {
-      if (_authCubit.state.session == null ||
-          _authCubit.state.headers == null) {
-        await _login();
-      } else {
-        await _getOauthToken();
-      }
-    }
-    // 重新加載數據給 Cubit
+    if (needsRefresh) await _getOauthToken();
     await _authCubit.checkAuthState();
   }
 
@@ -254,7 +222,7 @@ class NueipService {
 
         switch (logData) {
           case {'timeoff': var timeoff, 'punch': var punch}
-              when timeoff == null && punch == null:
+              when timeoff == null && punch == []:
             dailyLogCubit.hasNoLogs();
 
           case {'dateInfo': var dateInfo}
@@ -265,7 +233,10 @@ class NueipService {
             final String timeOffName = timeoff.first['rule_name'];
             dailyLogCubit.hasTimeOff(timeOffType: timeOffName);
 
-          case {'punch': var punch} when punch != null:
+          case {'attendance': var attendance} when attendance == null:
+            dailyLogCubit.hasNoLogs();
+
+          case {'punch': var punch} when punch != []:
             final List<WorkLog> workLogs = [];
             if (punch case {'onPunch': var onPunch}) {
               workLogs.add((

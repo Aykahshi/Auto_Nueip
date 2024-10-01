@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gl_nueip/generated/assets.dart';
+import 'package:gl_nueip/core/utils/assets.dart';
 import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 

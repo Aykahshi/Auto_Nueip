@@ -35,7 +35,8 @@
     "title": "Logs of the day",
     "time": "Time",
     "status": "Status",
-    "no_logs": "Nothing to show."
+    "no_logs": "Nothing to show.",
+    "error": "Failed to get logs. Please try again."
   },
   "clock": {
     "in": "Clock In",
