@@ -9,6 +9,8 @@ import 'package:gl_nueip/core/services/notification_service.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/screens/pages/home_page.dart';
+import 'package:gl_nueip/screens/pages/login_page.dart';
+import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:preferences_local_storage_inspector/preferences_local_storage_inspector.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -22,9 +24,6 @@ void main() async {
   await NotificationService.init();
   await locator<NotificationService>().checkNotificationsEnabled();
   await locator<NotificationService>().checkClockedOrNot();
-  if (locator<AuthCubit>().isLoggedIn) {
-    await locator<NueipService>().checkStatus();
-  }
 
   if (kDebugMode) {
     final driver = StorageServerDriver(
@@ -52,8 +51,27 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final bool isLoggedIn = locator<AuthCubit>().isLoggedIn;
+
+  void checkAuth() async {
+    if (isLoggedIn) {
+      await locator<NueipService>().checkStatus();
+    }
+  }
+
+  @override
+  void initState() {
+    checkAuth();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +79,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => locator<AuthCubit>()),
         BlocProvider(create: (_) => locator<RemindCubit>()),
+        BlocProvider(create: (_) => locator<LocationCubit>()),
         BlocProvider(create: (_) => locator<UserCubit>()),
         BlocProvider(create: (_) => locator<ClockCubit>()),
         BlocProvider(create: (_) => locator<DailyLogCubit>()),
@@ -68,10 +87,16 @@ class MyApp extends StatelessWidget {
       ],
       child: KeyboardDismissOnTap(
         dismissOnCapturedTaps: true,
-        child: ShadApp(
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
+        child: ShadApp.material(
           locale: context.locale,
+          supportedLocales: context.supportedLocales,
+          localizationsDelegates: context.localizationDelegates,
+          initialRoute: isLoggedIn ? '/' : '/login',
+          routes: {
+            '/': (context) => const HomePage(),
+            '/login': (context) => const LoginPage(),
+            '/settings': (context) => const SettingPage(),
+          },
           theme: ShadThemeData(
             colorScheme: const ShadSlateColorScheme.dark(),
             brightness: Brightness.dark,
@@ -81,7 +106,6 @@ class MyApp extends StatelessWidget {
           ),
           debugShowCheckedModeBanner: false,
           title: 'Auto Nueip',
-          home: const HomePage(),
         ),
       ),
     );

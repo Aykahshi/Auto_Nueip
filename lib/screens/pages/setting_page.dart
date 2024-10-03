@@ -9,6 +9,7 @@ import 'package:gl_nueip/bloc/user/user_cubit.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/assets.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
+import 'package:gl_nueip/core/utils/show_toast.dart';
 import 'package:gl_nueip/screens/dialogs/current_info_dialog.dart';
 import 'package:gl_nueip/screens/dialogs/reset_alert.dart';
 import 'package:gl_nueip/screens/dialogs/user_info_dialog.dart';
@@ -31,7 +32,13 @@ class SettingPage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () => service.checkStatus(),
+            onPressed: () async {
+              await service.checkStatus();
+              showToast(
+                'settings.refresh'.tr(),
+                Colors.lightBlueAccent.withOpacity(0.5),
+              );
+            },
             icon: const Icon(Icons.restart_alt_outlined, size: 30),
           ),
           const SizedBox(width: 20)

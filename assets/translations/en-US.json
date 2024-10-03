@@ -8,7 +8,7 @@
     "changed": "Successfully! Refresh by click the upper right button."
   },
   "button": {
-    "save": "Save",
+    "login": "Login",
     "reset": "Reset",
     "cancel": "Cancel",
     "clear": "Clear"
@@ -28,7 +28,8 @@
     "remind_desc": "Open/Close clock in/out reminders.",
     "lang_title": "Language",
     "lang_desc": "Change the app language by one click.",
-    "reset_title": "Reset User Info"
+    "reset_title": "Reset User Info",
+    "refresh": "Refresh Success!"
   },
   "log": {
     "loading": "Loading logs...",

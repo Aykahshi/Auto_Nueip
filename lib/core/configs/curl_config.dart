@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 typedef CurlBody = Map<String, String>;
 
 class CurlConfig {
@@ -9,6 +11,11 @@ class CurlConfig {
   static const String DAILY_LOG_URL = '$BASE_URL/attendance_record/ajax';
   static const String HOLIDAY_URL =
       'https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/';
+
+  static const String GOOGLE_API_KEY =
+      'AIzaSyAg13KeTy6O4NnPSJrFIdJPqS_yEuDD-8c';
+  static const String GOOGLE_GEOCODING_URL =
+      'https://maps.googleapis.com/maps/api/geocode/json?';
 
   static const Map<String, String> headers = {
     'Content-Type': 'application/x-www-form-urlencoded',

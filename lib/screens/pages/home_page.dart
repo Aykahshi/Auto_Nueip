@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/screens/dialogs/user_info_dialog.dart';
-import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:gl_nueip/screens/widgets/calendar_widget.dart';
 import 'package:gl_nueip/screens/widgets/clock_button_widget.dart';
 import 'package:gl_nueip/screens/widgets/scaffold_with_action_widget.dart';
