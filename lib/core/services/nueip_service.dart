@@ -60,7 +60,7 @@ class NueipService {
     }
   }
 
-  Future<void> _login() async {
+  Future<void> login() async {
     final CurlBody body = {
       'inputCompany': _userCubit.state.user.company,
       'inputID': _userCubit.state.user.id,
@@ -110,8 +110,10 @@ class NueipService {
     final String timeStamp = timeFormat(DateTime.now());
     final String? cookieHeader = _authCubit.state.headers!.cookie;
     final String? csrfToken = _authCubit.state.headers!.csrfToken;
-    const Location location =
-        Location(latitude: '22.6282043', longitude: '120.2930865');
+    final LocationCubit locationCubit = locator<LocationCubit>();
+    locationCubit.loadLocation();
+
+    Location location = (locationCubit.state as LocationHasValue).location;
 
     final formData = {
       'action': 'add',
@@ -128,7 +130,7 @@ class NueipService {
   }
 
   Future<void> _checkAuth() async {
-    await _login();
+    await login();
     bool needsRefresh = false;
 
     needsRefresh = !_authCubit.hasLoggedIn();

@@ -11,6 +11,7 @@ import 'package:gl_nueip/core/utils/assets.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/core/utils/show_toast.dart';
 import 'package:gl_nueip/screens/dialogs/current_info_dialog.dart';
+import 'package:gl_nueip/screens/dialogs/location_dialog.dart';
 import 'package:gl_nueip/screens/dialogs/reset_alert.dart';
 import 'package:gl_nueip/screens/dialogs/user_info_dialog.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -120,6 +121,17 @@ class SettingPage extends StatelessWidget {
                           icons: Icons.person_outline_outlined,
                           title: 'settings.change_title'.tr(),
                           subtitle: 'settings.change_desc'.tr(),
+                        ),
+                        SettingsItem(
+                          onTap: () {
+                            showShadDialog(
+                              context: context,
+                              builder: (_) => const LocationDialog(),
+                            );
+                          },
+                          icons: Icons.location_on_outlined,
+                          title: 'settings.location_title'.tr(),
+                          subtitle: 'settings.location_desc'.tr(),
                         ),
                         SettingsItem(
                           onTap: () =>

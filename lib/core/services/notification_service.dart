@@ -8,7 +8,6 @@ import 'package:gl_nueip/bloc/remind/remind_cubit.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/enum.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -21,7 +20,7 @@ class NotificationService {
     tz.setLocalLocation(tz.getLocation('Asia/Taipei'));
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('res_app_icon');
     final DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -68,29 +67,27 @@ class NotificationService {
     return await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
                 IOSFlutterLocalNotificationsPlugin>()
-            ?.requestPermissions(
-              alert: true,
-              badge: true,
-              sound: true,
-            ) ??
+            ?.requestPermissions(alert: true, badge: true, sound: true) ??
         false;
   }
 
   Future<bool> _requestAndroidPermissions() async {
-    final notificationStatus = await Permission.notification.request();
-    final bool notificationPermissionGranted = notificationStatus.isGranted;
+    final bool hasNotificationPermission = await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.requestNotificationsPermission() ??
+        false;
 
-    final alarmStatus = await Permission.scheduleExactAlarm.request();
-    final bool exactAlarmPermissionGranted = alarmStatus.isGranted;
+    final bool hasExactAlarmsPermission = await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.requestExactAlarmsPermission() ??
+        false;
 
-    final bool? exactAlarmsGranted = await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
+    final bool permissonGranted =
+        hasNotificationPermission || hasExactAlarmsPermission;
 
-    return notificationPermissionGranted &&
-        exactAlarmPermissionGranted &&
-        (exactAlarmsGranted ?? false);
+    return permissonGranted;
   }
 
   Future<void> checkNotificationsEnabled() async {
@@ -162,6 +159,7 @@ class NotificationService {
       channelDescription: 'Notifications for clock in and out reminders',
       importance: Importance.high,
       priority: Priority.high,
+      ticker: 'ticker',
     );
     const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
     const platformChannelSpecifics = NotificationDetails(
@@ -175,7 +173,7 @@ class NotificationService {
       body,
       _nextInstanceOfWeekday(weekday, hour),
       platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,

@@ -11,12 +11,12 @@ final class LocationNone extends LocationState {
 
 final class LocationHasValue extends LocationState {
   final Location location;
-  final String locationName;
+  final String address;
 
-  const LocationHasValue({required this.location, required this.locationName});
+  const LocationHasValue({required this.location, required this.address});
 
   @override
-  List<Object> get props => [location];
+  List<Object> get props => [location, address];
 }
 
 final class LocationHasError extends LocationState {

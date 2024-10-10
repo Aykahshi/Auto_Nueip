@@ -13,7 +13,7 @@ class CurlConfig {
       'https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/';
 
   static const String GOOGLE_API_KEY =
-      'AIzaSyAg13KeTy6O4NnPSJrFIdJPqS_yEuDD-8c';
+      'AIzaSyDGc_P8ogFFwR6-V-oFV4W-_IWOU2ICl14';
   static const String GOOGLE_GEOCODING_URL =
       'https://maps.googleapis.com/maps/api/geocode/json?';
 

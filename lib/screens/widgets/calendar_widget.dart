@@ -24,13 +24,18 @@ class _WorklogCalendarState extends State<WorklogCalendar> {
 
   final HolidayService _holidayService = locator<HolidayService>();
 
+  void getHolidays() async {
+    var holidays = await _holidayService.getHolidays();
+    setState(() {
+      _holidayList = holidays;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _holidayService.getHolidays().then((holidays) {
-      setState(() {
-        _holidayList = holidays;
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getHolidays();
     });
   }
 

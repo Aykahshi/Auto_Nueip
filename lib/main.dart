@@ -1,21 +1,64 @@
+import 'dart:developer';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:geofence_foreground_service/constants/geofence_event_type.dart';
+import 'package:geofence_foreground_service/geofence_foreground_service.dart';
 import 'package:gl_nueip/bloc/cubit.dart';
+import 'package:gl_nueip/core/services/geofence_service.dart';
 import 'package:gl_nueip/core/services/notification_service.dart';
 import 'package:gl_nueip/core/services/nueip_service.dart';
 import 'package:gl_nueip/core/utils/injection_container.dart';
 import 'package:gl_nueip/screens/pages/home_page.dart';
-import 'package:gl_nueip/screens/pages/login_page.dart';
-import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:preferences_local_storage_inspector/preferences_local_storage_inspector.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:storage_inspector/storage_inspector.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  GeofenceForegroundService().handleTrigger(
+    backgroundTriggerHandler: (zoneID, triggerType) async {
+      DateTime dateTime = DateTime.now();
+      if (triggerType == GeofenceEventType.enter) {
+        log('進入公司');
+
+        if (isWithinWorkTimeRange(dateTime)) {
+          await NueipService().clockIn();
+        }
+      } else if (triggerType == GeofenceEventType.exit) {
+        log('離開公司');
+
+        if (isWithinLeaveTimeRange(dateTime)) {
+          await NueipService().clockOut();
+        }
+      } else if (triggerType == GeofenceEventType.dwell) {
+        log('dwell', name: 'triggerType');
+      } else {
+        log('unknown', name: 'triggerType');
+      }
+      return Future.value(true);
+    },
+  );
+}
+
+bool isWithinWorkTimeRange(DateTime time) {
+  final start = DateTime(time.year, time.month, time.day, 8, 0);
+  final end = DateTime(time.year, time.month, time.day, 10, 0);
+  return time.isAfter(start) && time.isBefore(end);
+}
+
+bool isWithinLeaveTimeRange(DateTime time) {
+  final start = DateTime(time.year, time.month, time.day, 17, 0);
+  final end = DateTime(time.year, time.month, time.day, 19, 0);
+  return time.isAfter(start) && time.isBefore(end);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +67,7 @@ void main() async {
   await NotificationService.init();
   await locator<NotificationService>().checkNotificationsEnabled();
   await locator<NotificationService>().checkClockedOrNot();
+  GeofenceService();
 
   if (kDebugMode) {
     final driver = StorageServerDriver(
@@ -43,7 +87,7 @@ void main() async {
         Locale('zh', 'TW'),
       ],
       startLocale: locator<LangCubit>().currentLocale,
-      fallbackLocale: const Locale('zh', 'TW'),
+      fallbackLocale: const Locale('en', 'US'),
       path: 'assets/translations',
       assetLoader: const JsonAssetLoader(),
       child: const MyApp(),
@@ -91,12 +135,6 @@ class _MyAppState extends State<MyApp> {
           locale: context.locale,
           supportedLocales: context.supportedLocales,
           localizationsDelegates: context.localizationDelegates,
-          initialRoute: isLoggedIn ? '/' : '/login',
-          routes: {
-            '/': (context) => const HomePage(),
-            '/login': (context) => const LoginPage(),
-            '/settings': (context) => const SettingPage(),
-          },
           theme: ShadThemeData(
             colorScheme: const ShadSlateColorScheme.dark(),
             brightness: Brightness.dark,
@@ -106,6 +144,7 @@ class _MyAppState extends State<MyApp> {
           ),
           debugShowCheckedModeBanner: false,
           title: 'Auto Nueip',
+          home: const HomePage(),
         ),
       ),
     );

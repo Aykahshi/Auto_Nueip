@@ -11,7 +11,7 @@ class LocationCubit extends Cubit<LocationState> {
   final SharedPreferences _prefs;
 
   static const String _geoKey = 'location';
-  static const String _geoNameKey = 'location_name';
+  static const String _addressKey = 'address';
 
   LocationCubit(this._prefs) : super(LocationNone()) {
     loadLocation();
@@ -19,16 +19,22 @@ class LocationCubit extends Cubit<LocationState> {
 
   void updateLocation({
     required Location newLocation,
-    required String newLocationName,
+    required String newAddress,
   }) {
     saveLocation(
       location: newLocation,
-      locationName: newLocationName,
+      address: newAddress,
     );
     emit(LocationHasValue(
       location: newLocation,
-      locationName: newLocationName,
+      address: newAddress,
     ));
+  }
+
+  void clearLocation() async {
+    _prefs.remove(_geoKey);
+    _prefs.remove(_addressKey);
+    emit(LocationNone());
   }
 
   void geoNotFound() async {
@@ -41,7 +47,7 @@ class LocationCubit extends Cubit<LocationState> {
 
   void loadLocation() async {
     final locationString = _prefs.getString(_geoKey);
-    final locationName = _prefs.getString(_geoNameKey);
+    final locationName = _prefs.getString(_addressKey);
 
     if (locationString == null || locationName == null) return;
 
@@ -50,15 +56,15 @@ class LocationCubit extends Cubit<LocationState> {
 
     emit(LocationHasValue(
       location: location,
-      locationName: locationName,
+      address: locationName,
     ));
   }
 
   Future<void> saveLocation({
     required Location location,
-    required String locationName,
+    required String address,
   }) async {
-    _prefs.setString(_geoNameKey, jsonEncode(locationName));
+    _prefs.setString(_addressKey, jsonEncode(address));
     _prefs.setString(_geoKey, jsonEncode(location.toJson()));
   }
 }

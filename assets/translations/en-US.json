@@ -5,10 +5,12 @@
   "holiday": "It's holiday today!",
   "change_action": {
     "title": "Change User Info",
+    "location": "Change Company Address",
+    "location_changed": "Change Address Success!",
     "changed": "Successfully! Refresh by click the upper right button."
   },
   "button": {
-    "login": "Login",
+    "save": "Save",
     "reset": "Reset",
     "cancel": "Cancel",
     "clear": "Clear"
@@ -28,6 +30,8 @@
     "remind_desc": "Open/Close clock in/out reminders.",
     "lang_title": "Language",
     "lang_desc": "Change the app language by one click.",
+    "location_title": "Location",
+    "location_desc": "Change your company address",
     "reset_title": "Reset User Info",
     "refresh": "Refresh Success!"
   },
@@ -82,6 +86,7 @@
   },
   "placeholder": {
     "company": "Enter your company name",
+    "address": "Enter your company address",
     "name": "Enter your name",
     "id": "Enter your UserID",
     "password": "Enter your password"

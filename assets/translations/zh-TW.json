@@ -5,10 +5,12 @@
   "holiday": "今天不用上班！",
   "change_action": {
     "title": "修改使用者資料",
+    "location": "修改公司地址",
+    "location_changed": "公司地址已修改！",
     "changed": "修改成功！請點擊右上角刷新！"
   },
   "button": {
-    "login": "登入",
+    "save": "保存",
     "reset": "重置",
     "cancel": "取消",
     "clear": "清除"
@@ -28,6 +30,8 @@
     "remind_desc": "開啟或關閉打卡提醒功能。",
     "lang_title": "語言",
     "lang_desc": "一鍵變更應用程式語言！",
+    "location_title": "定位",
+    "location_desc": "修改公司地址。",
     "reset_title": "重置使用者資料",
     "refresh": "資料刷新成功！"
   },
@@ -82,6 +86,7 @@
   },
   "placeholder": {
     "company": "請輸入公司編號",
+    "address": "請輸入公司地址",
     "name": "請輸入使用者名稱",
     "id": "請輸入員工編號",
     "password": "請輸入密碼"

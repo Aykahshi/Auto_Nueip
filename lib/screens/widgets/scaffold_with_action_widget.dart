@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gl_nueip/core/utils/assets.dart';
+import 'package:gl_nueip/screens/pages/setting_page.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ScaffoldWithAction extends StatelessWidget {
@@ -22,7 +23,10 @@ class ScaffoldWithAction extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingPage()),
+            ),
           ),
           const SizedBox(width: 10),
         ],

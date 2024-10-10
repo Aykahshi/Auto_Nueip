@@ -22,7 +22,7 @@ class LocationService {
             latitude: latLng['lat'].toString(),
             longitude: latLng['lng'].toString());
 
-        _locationCubit.saveLocation(location: location, locationName: address);
+        _locationCubit.saveLocation(location: location, address: address);
 
         return location;
       } else {

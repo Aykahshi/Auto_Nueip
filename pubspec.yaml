@@ -28,63 +28,67 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  awesome_notifications: ^0.9.3+1
-  babstrap_settings_screen:
-    git:
-      url: https://github.com/Aykahshi/babstrap_settings_screen_fix.git
-      ref: main
-  cookie_jar: ^4.0.8
-
+  flutter:
+    sdk: flutter
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
   # Networks
   dio: ^5.7.0
+  cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1
 
   # i18n
   easy_localization: ^3.0.7
   easy_localization_loader: ^2.0.2
-  equatable: ^2.0.5
-  flutter:
-    sdk: flutter
-  flutter_bloc: ^8.1.6
 
-  flutter_keyboard_visibility: ^6.0.0
-  fluttertoast: ^8.2.8
+  # GeoService
+  geocoding: ^3.0.0
+  geofence_service: ^6.0.0
+  geofence_foreground_service: ^1.1.3
 
-  # for Layout
+  # for UI
   gap: ^3.0.1
+  shadcn_ui: ^0.11.1
+  home_widget: ^0.7.0
+  table_calendar: ^3.1.2
+  babstrap_settings_screen:
+    git:
+      url: https://github.com/Aykahshi/babstrap_settings_screen_fix.git
+      ref: main
 
   # State and Storage
-  get_it: ^7.7.0
+  get_it: ^8.0.0
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  shared_preferences: ^2.3.2
 
   # Fonts
   google_fonts: ^6.2.1
-  home_widget: ^0.7.0
-  html: ^0.15.4
 
   # Utils
+  html: ^0.15.4
   intl: ^0.19.0
-  network_info_plus: ^6.0.1
   permission_handler: ^11.3.1
   preferences_local_storage_inspector: ^0.4.0
   timezone: ^0.9.4
   flutter_local_notifications: ^17.2.3
   pretty_dio_logger: ^1.4.0
-  shadcn_ui: ^0.9.5
-  shared_preferences: ^2.3.2
+  flutter_keyboard_visibility: ^6.0.0
+  fluttertoast: ^8.2.8
 
   # Storage Inspector
   storage_inspector: ^0.4.0
-  table_calendar: ^3.1.2
+
+
+
 
 dev_dependencies:
   bloc_test: ^9.1.7
-  build_runner: ^2.4.12
-  flutter_launcher_icons: ^0.13.1
-  flutter_lints: ^4.0.0
+  build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.1
+  flutter_lints: ^5.0.0
 
   flutter_native_splash: ^2.4.1
   flutter_test:
