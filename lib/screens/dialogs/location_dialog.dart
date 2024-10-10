@@ -76,7 +76,9 @@ class _LocationDialogState extends State<LocationDialog> {
         child: BlocBuilder<LocationCubit, LocationState>(
           builder: (context, state) {
             textController = TextEditingController(
-                text: state is LocationHasValue ? state.address : '');
+                text: state is LocationHasValue
+                    ? state.address.replaceAll('"', '')
+                    : '');
 
             return ShadInput(
               controller: textController,
